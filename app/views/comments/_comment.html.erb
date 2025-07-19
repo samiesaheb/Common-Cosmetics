@@ -1,5 +1,9 @@
+<% depth ||= 0 %>
+
 <%= turbo_frame_tag dom_id(comment) do %>
-  <div id="<%= dom_id(comment) %>" class="border rounded px-4 py-2 bg-gray-50 dark:bg-gray-800">
+  <div id="<%= dom_id(comment) %>" class="border rounded px-4 py-2 bg-gray-50 dark:bg-gray-800"
+       style="margin-left: <%= "#{[depth, 5].min * 1.25}rem" %>">
+    
     <div class="flex justify-between items-start">
       <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
         👤 <%= comment.user&.username || "Unknown User" %>
@@ -41,16 +45,19 @@
       <div id="<%= dom_id(comment, :reply_form) %>" class="mt-2 hidden">
         <%= render partial: "comments/form", locals: {
           post: comment.post,
-          comment: comment.replies.build(parent_id: comment.id, post: comment.post)
+          comment: Comment.new(parent_id: comment.id)
         } %>
       </div>
     <% end %>
 
     <!-- 🪡 Recursive replies -->
-    <div class="ml-4 mt-3 space-y-2">
-      <% comment.replies.each do |reply| %>
-        <%= render partial: "comments/comment", locals: { comment: reply } %>
-      <% end %>
-    </div>
+    <% if depth < 5 %>
+      <div class="mt-3 space-y-2">
+        <% comment.replies.each do |reply| %>
+          <%= render partial: "comments/comment", locals: { comment: reply, depth: depth + 1 } %>
+        <% end %>
+      </div>
+    <% end %>
+
   </div>
 <% end %>

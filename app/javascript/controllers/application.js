@@ -1,10 +1,8 @@
 import { Application } from "@hotwired/stimulus"
-import ReplyFormController from "./controllers/reply_form_controller"
 
 const application = Application.start()
+window.application = application // ✅ enables console debugging
 
-// ✅ Make Stimulus available globally (you’re missing this part)
-window.Stimulus = application
+application.debug = true
 
-application.debug = false
-application.register("reply-form", ReplyFormController)
+export { application }

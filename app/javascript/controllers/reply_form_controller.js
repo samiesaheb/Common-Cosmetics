@@ -1,10 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  static targets = ["replyForm"]
+
   toggle(event) {
     event.preventDefault()
-    const id = this.element.dataset.replyFormTarget
+    const id = event.currentTarget.dataset.replyFormTarget
     const form = document.getElementById(id)
-    form?.classList.toggle("hidden")
+    if (form) form.classList.toggle("hidden")
   }
 }
