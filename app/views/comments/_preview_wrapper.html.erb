@@ -1,0 +1,3 @@
+<%= turbo_frame_tag "comments_post_#{post.id}" do %>
+  <%= render partial: "comments/preview", locals: { post: post, limit: nil } %>
+<% end %>

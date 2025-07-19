@@ -1,0 +1,17 @@
+<% if comment.persisted? && comment.post.present? %>
+  <div id="comment_like_<%= comment.id %>" class="text-sm text-gray-500 mt-2">
+    <% if comment.comment_likes.exists?(user: current_user) %>
+      <%= button_to "💔 Unlike", post_comment_like_path(comment.post, comment),
+                    method: :delete,
+                    data: { turbo_frame: "comment_like_#{comment.id}" },
+                    class: "text-red-500 text-xs bg-transparent border-none p-0" %>
+    <% else %>
+      <%= button_to "❤️ Like", post_comment_like_path(comment.post, comment),
+                    method: :post,
+                    data: { turbo_frame: "comment_like_#{comment.id}" },
+                    class: "text-gray-600 text-xs bg-transparent border-none p-0" %>
+    <% end %>
+
+    <span class="ml-1"><%= comment.comment_likes.count %> likes</span>
+  </div>
+<% end %>

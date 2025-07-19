@@ -1,0 +1,22 @@
+<div class="bg-white shadow rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2"><%= post.user.username %></h2>
+  <p class="mb-2"><%= post.content %></p>
+
+  <% latest_comments = post.comments.order(created_at: :desc).limit(2).reverse %>
+
+  <div id="comments-for-post-<%= post.id %>">
+    <%= render partial: "comments/comment", collection: latest_comments, as: :comment %>
+  </div>
+
+  <% if post.comments.count > 2 %>
+    <%= turbo_frame_tag "more_comments_#{post.id}" do %>
+      <%= button_to "Show more comments", 
+          more_comments_post_path(post), 
+          method: :get, 
+          data: { turbo_frame: "comments-for-post-#{post.id}" },
+          class: "text-sm text-blue-600 mt-2" %>
+    <% end %>
+  <% end %>
+
+  <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
+</div>

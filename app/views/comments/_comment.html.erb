@@ -1,0 +1,56 @@
+<%= turbo_frame_tag dom_id(comment) do %>
+  <div id="<%= dom_id(comment) %>" class="border rounded px-4 py-2 bg-gray-50 dark:bg-gray-800">
+    <div class="flex justify-between items-start">
+      <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        👤 <%= comment.user&.username || "Unknown User" %>
+        <% if comment.created_at.present? %>
+          <span class="text-xs ml-2"><%= time_ago_in_words(comment.created_at) %> ago</span>
+        <% else %>
+          <span class="text-xs ml-2 italic text-yellow-500">just now</span>
+        <% end %>
+      </div>
+
+      <% if comment.user == current_user %>
+        <div class="flex gap-2 items-center">
+          <%= button_to "🗑️",
+                        post_comment_path(comment.post, comment),
+                        method: :delete,
+                        data: { turbo_confirm: "Delete this comment?" },
+                        class: "text-red-500 text-xs bg-transparent border-none p-0" %>
+        </div>
+      <% end %>
+    </div>
+
+    <p class="text-gray-900 dark:text-gray-100 mt-1"><%= comment.body %></p>
+
+    <!-- ❤️ Like for comment -->
+    <%= render partial: "comments/like", locals: { comment: comment } %>
+
+    <!-- 💬 Reply link -->
+    <% if user_signed_in? %>
+      <div class="mt-2 text-xs">
+        <%= link_to "💬 Reply", "#",
+                    data: {
+                      action: "click->reply-form#toggle",
+                      reply_form_target: dom_id(comment, :reply_form)
+                    },
+                    class: "text-blue-600 hover:underline" %>
+      </div>
+
+      <!-- 🧵 Reply form (hidden by default) -->
+      <div id="<%= dom_id(comment, :reply_form) %>" class="mt-2 hidden">
+        <%= render partial: "comments/form", locals: {
+          post: comment.post,
+          comment: comment.replies.build(parent_id: comment.id, post: comment.post)
+        } %>
+      </div>
+    <% end %>
+
+    <!-- 🪡 Recursive replies -->
+    <div class="ml-4 mt-3 space-y-2">
+      <% comment.replies.each do |reply| %>
+        <%= render partial: "comments/comment", locals: { comment: reply } %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

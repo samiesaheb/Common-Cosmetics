@@ -1,0 +1,14 @@
+<% post.comments.order(created_at: :asc).limit(limit).each do |comment| %>
+  <div class="mt-2 border-t pt-2 text-sm text-gray-700 dark:text-gray-300">
+    <strong><%= comment.user.username %>:</strong>
+    <%= truncate(comment.body, length: 100) %>
+  </div>
+<% end %>
+
+<% if limit.present? && post.comments.count > limit %>
+    <%= button_to "💬 Load more",
+                more_comments_post_path(post),
+                method: :get,
+                data: { turbo_frame: "comments_post_#{post.id}" },
+                class: "text-primary hover:underline text-sm mt-2 inline-block bg-transparent border-0 p-0" %>
+<% end %>

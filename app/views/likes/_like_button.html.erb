@@ -1,0 +1,10 @@
+<%= turbo_frame_tag "like_post_#{post.id}" do %>
+  <div class="mt-4 flex items-center gap-3 text-sm">
+    <% if post.likes.exists?(user: current_user) %>
+      <%= button_to "💔 Unlike", post_like_path(post), method: :delete, data: { turbo_frame: "like_post_#{post.id}" }, class: "text-red-600 hover:underline" %>
+    <% else %>
+      <%= button_to "❤️ Like", post_like_path(post), method: :post, data: { turbo_frame: "like_post_#{post.id}" }, class: "text-gray-700 hover:underline" %>
+    <% end %>
+    <span class="text-gray-500"><%= post.likes.count %> likes</span>
+  </div>
+<% end %>

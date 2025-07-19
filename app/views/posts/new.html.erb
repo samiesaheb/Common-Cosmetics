@@ -1,0 +1,24 @@
+<h1 class="text-2xl font-bold mb-6">🧼 New Post</h1>
+
+<%= form_with(model: @post, local: true, html: { multipart: true }, class: "space-y-6 w-full max-w-xl") do |f| %>
+  <div>
+    <%= f.label :caption, class: "block text-sm font-medium" %>
+    <%= f.text_area :caption, rows: 4, class: "mt-1 block w-full border border-gray-300 rounded px-3 py-2" %>
+  </div>
+
+  <div>
+    <%= f.label :rating, class: "block text-sm font-medium" %>
+    <%= f.select :rating, options_for_select(1..5), {}, class: "mt-1 block w-full border border-gray-300 rounded px-3 py-2" %>
+  </div>
+
+  <div>
+    <%= f.label :image, class: "block text-sm font-medium" %>
+    <%= f.file_field :image, class: "mt-1 block w-full" %>
+  </div>
+
+  <div>
+    <%= f.submit "Create Post", class: "bg-primary text-white px-4 py-2 rounded" %>
+  </div>
+<% end %>
+
+<%= link_to "⬅ Back", posts_path, class: "text-gray-600 hover:underline text-sm inline-block mt-4" %>

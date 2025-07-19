@@ -1,0 +1,57 @@
+<h1 class="text-2xl font-bold mb-4">🧼 Post Details</h1>
+
+<div class="border p-4 rounded shadow-sm bg-white dark:bg-gray-900">
+  <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+    <span>👤 <%= @post.user.username %></span>
+    <span>⭐ <%= @post.rating %>/5</span>
+  </div>
+
+  <p class="mt-2"><%= @post.caption %></p>
+
+  <% if @post.image.attached? %>
+    <div class="mt-2">
+      <%= image_tag @post.image, class: "rounded max-h-80 object-cover" %>
+    </div>
+  <% end %>
+</div>
+
+<h2 class="text-xl font-semibold mt-8 mb-4 text-gray-800 dark:text-white">💬 Comments</h2>
+
+<%= turbo_frame_tag "comments" do %>
+  <% if @post.comments.any? %>
+    <div id="comments" class="space-y-4">
+      <%= render partial: "comments/comment", collection: @post.comments.where(parent_id: nil).order(created_at: :asc), as: :comment %>
+    </div>
+  <% else %>
+    <p class="text-gray-500">No comments yet. Be the first to share your thoughts!</p>
+  <% end %>
+<% end %>
+
+<% if user_signed_in? %>
+  <%= turbo_frame_tag "new_comment" do %>
+    <%= form_with(model: [@post, Comment.new], local: false, class: "mt-6 space-y-4") do |f| %>
+      <div>
+        <%= f.label :body, "Add a comment", class: "block text-sm font-medium" %>
+        <%= f.text_area :body, rows: 3, class: "mt-1 block w-full border border-gray-300 rounded px-3 py-2" %>
+      </div>
+      <div>
+        <%= f.submit "Comment", class: "bg-primary text-white px-4 py-2 rounded" %>
+      </div>
+    <% end %>
+  <% end %>
+<% else %>
+  <p class="mt-4 text-sm text-gray-500">
+    You must <%= link_to "log in", new_user_session_path, class: "text-primary hover:underline" %> to comment.
+  </p>
+<% end %>
+
+<div class="mt-6 flex gap-4">
+  <%= link_to '⬅️ Back', posts_path, class: "text-gray-700 dark:text-gray-200 hover:underline" %>
+
+  <% if @post.user == current_user %>
+    <%= link_to '✏️ Edit', edit_post_path(@post), class: "text-blue-600 hover:underline" %>
+    <%= button_to '🗑️ Delete', post_path(@post), method: :delete,
+      data: { confirm: 'Are you sure?' },
+      class: "text-red-600 hover:underline bg-transparent border-none" %>
+  <% end %>
+</div>
