@@ -32,23 +32,24 @@
 
     <!-- 💬 Reply link -->
     <% if user_signed_in? %>
-      <div class="mt-2 text-xs">
+      <div data-controller="reply-form" class="mt-2 text-xs">
         <%= link_to "💬 Reply", "#",
                     data: {
                       action: "click->reply-form#toggle",
                       reply_form_target: dom_id(comment, :reply_form)
                     },
                     class: "text-blue-600 hover:underline" %>
-      </div>
 
-      <!-- 🧵 Reply form (hidden by default) -->
-      <div id="<%= dom_id(comment, :reply_form) %>" class="mt-2 hidden">
-        <%= render partial: "comments/form", locals: {
-          post: comment.post,
-          comment: Comment.new(parent_id: comment.id)
-        } %>
+        <!-- 🧵 Reply form (hidden by default) -->
+        <div id="<%= dom_id(comment, :reply_form) %>" class="mt-2 hidden">
+          <%= render partial: "comments/form", locals: {
+            post: comment.post,
+            comment: Comment.new(parent_id: comment.id)
+          } %>
+        </div>
       </div>
     <% end %>
+
 
     <!-- 🪡 Recursive replies -->
     <% if depth < 5 %>
