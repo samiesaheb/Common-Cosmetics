@@ -1,0 +1,7 @@
+<!-- app/views/notifications/_count.html.erb -->
+<% unread_count = current_user.notifications.unread.count %>
+<% if unread_count > 0 %>
+  <span id="notification-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">
+    <%= unread_count %>
+  </span>
+<% end %>

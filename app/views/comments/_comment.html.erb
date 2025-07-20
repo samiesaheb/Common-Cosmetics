@@ -5,8 +5,22 @@
        style="margin-left: <%= "#{[depth, 5].min * 1.25}rem" %>">
     
     <div class="flex justify-between items-start">
-      <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-        👤 <%= comment.user&.username || "Unknown User" %>
+      <!-- 🧑‍💬 Avatar + Username + Time -->
+      <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <% if comment.user&.avatar&.attached? %>
+          <%= image_tag comment.user.avatar.variant(resize_to_fill: [24, 24]), class: "w-6 h-6 rounded-full object-cover" %>
+        <% else %>
+          <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
+            👤
+          </div>
+        <% end %>
+
+        <% if comment.user.present? %>
+          <%= link_to comment.user.username, user_path(comment.user), class: "hover:underline text-primary" %>
+        <% else %>
+          <span class="italic text-gray-500">Unknown User</span>
+        <% end %>
+
         <% if comment.created_at.present? %>
           <span class="text-xs ml-2"><%= time_ago_in_words(comment.created_at) %> ago</span>
         <% else %>
@@ -25,40 +39,40 @@
       <% end %>
     </div>
 
-    <p class="text-gray-900 dark:text-gray-100 mt-1"><%= comment.body %></p>
+    <p class="text-gray-900 dark:text-gray-100 mt-1"><%= parse_mentions_to_links(comment.body) %></p>
 
     <!-- ❤️ Like for comment -->
     <%= render partial: "comments/like", locals: { comment: comment } %>
 
-    <!-- 💬 Reply link -->
+    <!-- 💬 Reply toggle -->
     <% if user_signed_in? %>
-      <div data-controller="reply-form" class="mt-2 text-xs">
+      <div class="mt-2 text-xs">
         <%= link_to "💬 Reply", "#",
                     data: {
+                      controller: "reply-form",
                       action: "click->reply-form#toggle",
                       reply_form_target: dom_id(comment, :reply_form)
                     },
                     class: "text-blue-600 hover:underline" %>
+      </div>
 
-        <!-- 🧵 Reply form (hidden by default) -->
-        <div id="<%= dom_id(comment, :reply_form) %>" class="mt-2 hidden">
-          <%= render partial: "comments/form", locals: {
-            post: comment.post,
-            comment: Comment.new(parent_id: comment.id)
-          } %>
-        </div>
+      <!-- Reply Form (toggle target) -->
+      <div id="<%= dom_id(comment, :reply_form) %>" class="mt-2 hidden">
+        <%= render partial: "comments/form", locals: {
+          post: comment.post,
+          comment: Comment.new(parent_id: comment.id)
+        } %>
       </div>
     <% end %>
 
-
-    <!-- 🪡 Recursive replies -->
+    <!-- 🧵 Replies (recursively rendered) -->
     <% if depth < 5 %>
-      <div class="mt-3 space-y-2">
+      <div id="<%= dom_id(comment, :comments) %>" class="mt-3 space-y-2">
         <% comment.replies.each do |reply| %>
           <%= render partial: "comments/comment", locals: { comment: reply, depth: depth + 1 } %>
         <% end %>
       </div>
     <% end %>
-
+    
   </div>
 <% end %>

@@ -41,6 +41,7 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 gem "devise"
 gem "rack-cors", require: "rack/cors"
+gem "friendly_id", "~> 5.4.0"
 
 
 group :development, :test do

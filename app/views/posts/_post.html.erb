@@ -1,22 +1,45 @@
-<div class="bg-white shadow rounded-lg p-4 mb-6">
-  <h2 class="text-lg font-semibold mb-2"><%= post.user.username %></h2>
-  <p class="mb-2"><%= post.content %></p>
-
-  <% latest_comments = post.comments.order(created_at: :desc).limit(2).reverse %>
-
-  <div id="comments-for-post-<%= post.id %>">
-    <%= render partial: "comments/comment", collection: latest_comments, as: :comment %>
+<div class="bg-gray-900 text-white dark:bg-gray-900 dark:text-white shadow rounded-lg p-4 mb-6">
+  <!-- 🧑‍🎤 Avatar + Username -->
+  <div class="flex items-center gap-2 mb-2">
+    <% if post.user.avatar.attached? %>
+      <%= image_tag url_for(post.user.avatar), class: "w-8 h-8 rounded-full object-cover" %>
+      <p class="text-xs text-gray-500"><%= url_for(post.user.avatar) %></p> <!-- TEMP: shows the raw URL for debugging -->
+    <% else %>
+      <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-500">
+        👤
+      </div>
+    <% end %>
+    <span class="font-semibold text-gray-300 dark:text-gray-200">
+      <%= post.user.username %>
+    </span>
   </div>
 
-  <% if post.comments.count > 2 %>
-    <%= turbo_frame_tag "more_comments_#{post.id}" do %>
+  <!-- 📝 Post Caption -->
+  <p class="mb-2 text-gray-100"><%= parse_mentions_to_links(post.caption) %></p>
+
+  <!-- 📸 Post Image -->
+  <% if post.image.attached? %>
+    <div class="mb-4">
+      <%= image_tag post.image.variant(resize_to_limit: [800, 800]),
+            class: "rounded-lg w-full object-cover border border-gray-800" %>
+    </div>
+  <% end %>
+
+  <!-- 💬 Comments Preview + Show More Button -->
+  <% latest_comments = post.comments.order(created_at: :desc).limit(2).reverse %>
+
+  <%= turbo_frame_tag "comments-for-post-#{post.id}" do %>
+    <%= render partial: "comments/comment", collection: latest_comments, as: :comment %>
+
+    <% if post.comments.count > 2 %>
       <%= button_to "Show more comments", 
           more_comments_post_path(post), 
           method: :get, 
           data: { turbo_frame: "comments-for-post-#{post.id}" },
-          class: "text-sm text-blue-600 mt-2" %>
+          class: "text-sm text-blue-400 hover:underline mt-2" %>
     <% end %>
   <% end %>
 
+  <!-- ➕ Comment Form -->
   <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
 </div>

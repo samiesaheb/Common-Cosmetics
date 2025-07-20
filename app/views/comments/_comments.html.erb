@@ -1,0 +1,3 @@
+<%= turbo_frame_tag "comments-for-post-#{post.id}" do %>
+  <%= render partial: "comments/comment", collection: comments, as: :comment %>
+<% end %>

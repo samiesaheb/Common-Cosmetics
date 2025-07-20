@@ -4,10 +4,17 @@ class PostsController < ApplicationController
   before_action :authorize_user!, only: [:edit, :update, :destroy]
 
   def index
-    @posts = Post.includes(:user, image_attachment: :blob).order(created_at: :desc)
+    @posts = Post.includes(user: { avatar_attachment: :blob }, image_attachment: :blob).order(created_at: :desc)
   end
 
   def show
+    Rails.logger.debug "✅ PostsController#show loaded with post ID #{params[:id]}"
+    @post = Post.find(params[:id])
+
+    if user_signed_in? && params[:notification_id].present?
+      notification = current_user.notifications.find_by(id: params[:notification_id])
+      notification&.mark_as_read!
+    end
   end
 
   def new
@@ -18,14 +25,14 @@ class PostsController < ApplicationController
     @post = current_user.posts.build(post_params)
 
     if @post.save
+      MentionParser.new(@post).call
       redirect_to @post, notice: "Post created successfully."
     else
       render :new, status: :unprocessable_entity
     end
   end
 
-  def edit
-  end
+  def edit; end
 
   def update
     if @post.update(post_params)
@@ -50,7 +57,6 @@ class PostsController < ApplicationController
       locals: { post: @post }
     )
   end
-
 
   private
 

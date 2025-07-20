@@ -3,23 +3,28 @@
 <%= link_to "➕ New Post", new_post_path, class: "bg-primary text-white px-4 py-2 rounded mb-6 inline-block" %>
 
 <% if @posts.any? %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="flex flex-col gap-6 w-full">
     <% @posts.each do |post| %>
       <div class="border rounded shadow-sm bg-white dark:bg-gray-900 p-4">
+        <!-- 👤 Username + Rating -->
         <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
-          <span>👤 <%= post.user.username %></span>
+          <span>
+            👤 <%= link_to post.user.username, user_path(post.user), class: "hover:underline text-primary" %>
+          </span>
           <span>⭐ <%= post.rating %>/5</span>
         </div>
 
-        <p class="mt-2 text-sm"><%= truncate(post.caption, length: 100) %></p>
+        <!-- ✏️ Caption -->
+        <p class="mt-2 text-sm text-gray-900 dark:text-gray-100"><%= truncate(parse_mentions_to_links(post.caption), length: 100) %></p>
 
+        <!-- 🖼️ Image -->
         <% if post.image.attached? %>
-          <%= link_to image_tag(post.image.variant(resize_to_limit: [400, 250]), class: "rounded mt-2 w-full object-cover"), post_path(post) %>
+          <%= link_to image_tag(post.image.variant(resize_to_limit: [600, 400]), class: "rounded mt-2 w-full object-cover"), post_path(post) %>
         <% else %>
           <%= link_to "View Post", post_path(post), class: "text-primary hover:underline block mt-2" %>
         <% end %>
 
-        <!-- ❤️ Like/Unlike Buttons (Turbo-enabled) -->
+        <!-- ❤️ Like -->
         <% if user_signed_in? %>
           <%= turbo_frame_tag "like_post_#{post.id}" do %>
             <div class="mt-4 flex items-center gap-3 text-sm">
@@ -33,20 +38,21 @@
           <% end %>
         <% end %>
 
-        <!-- 💬 Comments Preview (Turbo Frame) -->
+        <!-- 💬 Comments -->
         <div class="mt-4">
           <%= turbo_frame_tag "comments_post_#{post.id}" do %>
             <%= render partial: "comments/preview", locals: { post: post, limit: 2 } %>
           <% end %>
         </div>
 
-        <!-- ✍️ Comment Form --> 
+        <!-- ✍️ Comment Form -->
         <% if user_signed_in? %>
           <div class="mt-4">
             <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
           </div>
         <% end %>
 
+        <!-- ✏️ Edit/Delete -->
         <% if post.user == current_user %>
           <div class="mt-4 flex gap-3 text-sm">
             <%= link_to "✏️ Edit", edit_post_path(post), class: "text-blue-600 hover:underline" %>

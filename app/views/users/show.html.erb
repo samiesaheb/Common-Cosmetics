@@ -1,0 +1,37 @@
+<!-- app/views/users/show.html.erb -->
+<div class="max-w-2xl mx-auto mt-8 bg-gray-950 text-white rounded-xl shadow-lg ring-1 ring-gray-800 p-6">
+  <!-- 👤 Profile Header -->
+  <div class="flex items-center gap-4">
+    <% if @user.avatar.attached? %>
+      <%= image_tag @user.avatar.variant(resize_to_fill: [64, 64]), class: "w-16 h-16 rounded-full object-cover" %>
+    <% else %>
+      <div class="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xl text-gray-500">👤</div>
+    <% end %>
+
+    <div>
+      <h1 class="text-xl font-bold text-white"><%= @user.username %></h1>
+      <p class="text-sm text-gray-400">Joined <%= @user.created_at.strftime("%B %Y") %></p>
+      <p class="text-sm text-gray-400">
+        <%= pluralize(@user.following.count, "Following") %> · <%= pluralize(@user.followers.count, "Follower") %>
+      </p>
+    </div>
+  </div>
+
+  <% if @user.bio.present? %>
+    <div class="mt-4 text-gray-200 text-sm">
+      <p><%= @user.bio %></p>
+    </div>
+  <% end %>
+
+  <hr class="my-6 border-gray-700" />
+
+  <!-- 🧴 Posts -->
+  <h2 class="text-lg font-semibold mb-4">🧴 Posts</h2>
+  <% if @user.posts.any? %>
+    <div class="space-y-6">
+      <%= render partial: "posts/profile_post", collection: @user.posts.order(created_at: :desc), as: :post %>
+    </div>
+  <% else %>
+    <p class="text-gray-400">This user hasn't posted yet.</p>
+  <% end %>
+</div>

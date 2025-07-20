@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "users/show"
+  get "notifications/index"
   # Devise authentication routes
   devise_for :users, controllers: {
     registrations: "users/registrations"
@@ -23,4 +25,23 @@ Rails.application.routes.draw do
       resource :like, only: [:create, :destroy], controller: "comment_likes"
     end
   end
+
+  resources :notifications, only: [:index] do
+    collection do
+      post :mark_all_as_read
+    end
+
+    member do
+      post :mark_as_read
+    end
+  end
+
+  resources :users, only: [:show], param: :username do
+    post :follow, to: "follows#create"
+    delete :unfollow, to: "follows#destroy"
+  end
+
+  get "users/autocomplete", to: "users#autocomplete"
+
+
 end

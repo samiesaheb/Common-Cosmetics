@@ -125,6 +125,8 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
+    friendly_id (5.4.2)
+      activerecord (>= 4.0.0)
     fugit (1.11.1)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
@@ -407,6 +409,7 @@ DEPENDENCIES
   capybara
   debug
   devise
+  friendly_id (~> 5.4.0)
   image_processing (~> 1.2)
   importmap-rails
   kamal

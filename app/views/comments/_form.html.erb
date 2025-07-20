@@ -1,18 +1,32 @@
-<%= turbo_frame_tag "new_comment_post_#{post.id}" do %>
-  <%= form_with(model: [post, comment], data: { turbo_frame: "new_comment_post_#{post.id}" }, local: true, class: "space-y-2") do |f| %>
-    <%= f.hidden_field :parent_id %>
+<% turbo_id = comment.parent_id.present? ? dom_id(comment.parent, :reply_form) : "new_comment_post_#{post.id}" %>
 
-    <div>
-      <%= f.text_area :body,
-                      rows: 2,
-                      required: true,
-                      autocomplete: "off",
-                      placeholder: "Write a comment...",
-                      class: "w-full border rounded px-3 py-2" %>
-    </div>
+<%= turbo_frame_tag turbo_id do %>
+  <div data-controller="mention-autocomplete">
+    <%= form_with(model: [post, comment],
+                  data: { turbo_frame: turbo_id },
+                  local: true,
+                  class: "space-y-2") do |f| %>
+      <%= f.hidden_field :parent_id %>
 
-    <div>
-      <%= f.submit "Comment", class: "bg-primary text-white px-3 py-1 rounded text-sm" %>
-    </div>
-  <% end %>
+      <div>
+        <%= f.text_area :body,
+                        rows: 2,
+                        required: true,
+                        autocomplete: "off",
+                        placeholder: "Write a comment...",
+                        class: "w-full border rounded px-3 py-2",
+                        data: {
+                          mention_autocomplete_target: "input",
+                          action: "input->mention-autocomplete#onInput"
+                        } %>
+
+        <div data-mention-autocomplete-target="suggestions"
+             class="bg-white dark:bg-gray-900 border mt-1 rounded shadow text-sm z-10 relative"></div>
+      </div>
+
+      <div>
+        <%= f.submit "Comment", class: "bg-primary text-white px-3 py-1 rounded text-sm" %>
+      </div>
+    <% end %>
+  </div>
 <% end %>

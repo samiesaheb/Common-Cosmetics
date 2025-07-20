@@ -20,18 +20,22 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <%= turbo_include_tags %>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
 
   </head>
 
   <body class="bg-white text-gray-900 dark:bg-black dark:text-white">
     <%= render "shared/navbar" %>
 
-    <main class="container mx-auto mt-28 px-5">
+    <main class="max-w-2xl mx-auto mt-28 px-4">
       <% flash.each do |key, value| %>
         <div class="bg-red-100 text-red-800 px-4 py-2 mb-4 rounded w-full">
           <%= value %>
         </div>
       <% end %>
+
+      <%= turbo_stream_from "notifications_user_#{current_user.id}" if current_user %>
 
       <%= yield %>
     </main>

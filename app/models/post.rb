@@ -11,4 +11,6 @@ class Post < ApplicationRecord
 
   has_many :comments, dependent: :destroy
 
+  has_many :mentions, as: :mentionable, dependent: :destroy
+
 end

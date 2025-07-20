@@ -7,12 +7,19 @@ class CommentsController < ApplicationController
     @comment.user = current_user
 
     if @comment.save
+      MentionParser.new(@comment).call
+
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to post_path(@post), notice: "Comment added." }
       end
     else
-      turbo_frame_id = @comment.parent_id.present? ? dom_id(@comment.parent, :reply_form) : "new_comment_post_#{@post.id}"
+      turbo_frame_id =
+        if @comment.parent_id.present?
+          dom_id(@comment, :form)
+        else
+          "new_comment_post_#{@post.id}"
+        end
 
       respond_to do |format|
         format.turbo_stream do

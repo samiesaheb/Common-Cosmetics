@@ -1,0 +1,13 @@
+<% if notification.notifiable&.respond_to?(:post) && notification.notifiable.post.present? %>
+  <%= turbo_frame_tag dom_id(notification) do %>
+    <%= link_to post_path(notification.notifiable.post, notification_id: notification.id), data: { turbo_frame: "_top" }, class: "block" do %>
+      <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 <%= 'opacity-50' if notification.read_at %>">
+        <p class="text-sm text-gray-900 dark:text-white">
+          <strong><%= link_to notification.notifiable.user.username, user_path(notification.notifiable.user), class: "hover:underline text-primary" %>
+</strong>
+          <%= notification.action %> your post.
+        </p>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
