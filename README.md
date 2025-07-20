@@ -14,7 +14,10 @@ A social media platform built with Ruby on Rails where users can post photos, co
 - ⚡ **Turbo Streams** — Real-time updates with Hotwire
 - 🌗 **Dark Mode Toggle** — Red & black or Red & white theme
 - 🔐 **Devise Authentication** — Secure sign up, login, and settings
-- 🧠 **Future Additions** — Mentions, notifications, analytics, infinite scroll
+- 🔗 **@Mentions Support** — Mention users in posts and comments with live profile linking
+- 🧠 **Autocomplete for Mentions** — Autocomplete usernames as you type with dropdown selector
+- 🔔 **Notifications** — Get notified when you're mentioned
+- 🧩 **Mention Tracking** — Mentions are stored in the database and deduplicated
 
 ---
 
@@ -26,6 +29,7 @@ A social media platform built with Ruby on Rails where users can post photos, co
 - **Image Uploads**: Active Storage
 - **Authentication**: Devise
 - **Realtime UI**: Turbo Frames & Turbo Streams
+- **Clean URLs**: FriendlyId
 
 ---
 
@@ -46,6 +50,19 @@ bundle install
 bin/setup
 rails server
 ```
-🧠 Philosophy
 
+🧠 Philosophy
 Built for the cosmetics community to share, discover, and interact around real beauty content — all in real time and with a sleek, responsive UI.
+
+yaml
+Copy
+Edit
+
+---
+
+Let me know if you'd like to add:
+- Screenshots or GIFs of mentions and autocomplete
+- A roadmap section
+- Contributor / license details
+
+Would you like me to generate a banner image or preview card for GitHub too?
