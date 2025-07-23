@@ -1,0 +1,93 @@
+<div x-data="searchComponent()" x-init="init()" class="relative w-64 mx-auto">
+  <!-- Search Form -->
+  <form x-ref="searchForm" action="<%= search_path %>" method="get">
+    <input
+      type="text"
+      name="q"
+      x-model="query"
+      x-on:keydown.arrow-down.prevent="moveDown()"
+      x-on:keydown.arrow-up.prevent="moveUp()"
+      x-on:keydown.enter.prevent="select()"
+      x-on:input.debounce.300ms="search()"
+      @click.away="open = false"
+      placeholder="Search users or posts..."
+      class="w-full rounded-full px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+    />
+  </form>
+
+  <!-- Suggestions Dropdown -->
+  <div
+    x-show="open && results.length"
+    x-cloak
+    class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50"
+  >
+    <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+      <template x-for="(user, index) in results" :key="user.username">
+        <li
+          :class="{ 'bg-gray-100 dark:bg-gray-800': selected === index }"
+          class="flex items-center gap-2 px-4 py-2 cursor-pointer"
+          @click="goTo(user.username)"
+          @mouseenter="selected = index"
+        >
+          <img
+            :src="user.avatar_url || '/placeholder-avatar.png'"
+            alt="avatar"
+            class="w-6 h-6 rounded-full object-cover"
+          />
+          <span
+            class="text-sm text-gray-800 dark:text-gray-100"
+            x-text="user.username"
+          ></span>
+        </li>
+      </template>
+    </ul>
+  </div>
+</div>
+
+<script>
+  function searchComponent() {
+    return {
+      query: '',
+      results: [],
+      open: false,
+      selected: -1,
+      init() {
+        this.query = ''
+      },
+      search() {
+        if (this.query.length > 0) {
+          fetch(`/users/autocomplete?query=${encodeURIComponent(this.query)}`)
+            .then(res => res.json())
+            .then(data => {
+              this.results = data
+              this.open = true
+              this.selected = -1
+            })
+        } else {
+          this.results = []
+          this.open = false
+        }
+      },
+      moveDown() {
+        if (this.selected < this.results.length - 1) {
+          this.selected++
+        }
+      },
+      moveUp() {
+        if (this.selected > 0) {
+          this.selected--
+        }
+      },
+      select() {
+        if (this.selected >= 0) {
+          this.goTo(this.results[this.selected].username)
+        } else {
+          this.$refs.searchForm.submit()
+        }
+      },
+      goTo(username) {
+        window.location.href = `/users/${username}`
+      }
+    }
+  }
+</script>

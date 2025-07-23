@@ -12,15 +12,16 @@ class Like < ApplicationRecord
   def notify_recipient
     return if post.user == user # don't notify self
 
-    Notification.create!(
-      recipient: post.user,
-      notifiable: self,
-      action: "liked"
-    ).tap do |notification|
-      broadcast_prepend_to "notifications_user_#{notification.recipient.id}",
-        target: "notifications",
-        partial: "notifications/notification",
-        locals: { notification: notification }
+    def notify_recipient
+      return if post.user == user # don't notify self
+
+      Notification.create!(
+        recipient: post.user,
+        notifiable: post,
+        actor: user,             # 👈 YOU NEED THIS
+        action: "liked"
+      )
     end
   end
+
 end

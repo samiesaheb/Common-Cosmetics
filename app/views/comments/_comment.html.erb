@@ -2,23 +2,23 @@
 
 <%= turbo_frame_tag dom_id(comment) do %>
   <div id="<%= dom_id(comment) %>" class="border rounded px-4 py-2 bg-gray-50 dark:bg-gray-800"
-       style="margin-left: <%= "#{[depth, 5].min * 1.25}rem" %>">
+       style="margin-left: <%= [depth, 5].min * 1.25 %>rem">
     
     <div class="flex justify-between items-start">
       <!-- 🧑‍💬 Avatar + Username + Time -->
       <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
         <% if comment.user&.avatar&.attached? %>
-          <%= image_tag comment.user.avatar.variant(resize_to_fill: [24, 24]), class: "w-6 h-6 rounded-full object-cover" %>
+          <%= image_tag comment.user.avatar.variant(resize_to_fill: [24, 24]), class: "w-6 h-6 rounded-full object-cover border border-gray-200 dark:border-gray-700" %>
         <% else %>
-          <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
+          <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
             👤
           </div>
         <% end %>
 
         <% if comment.user.present? %>
-          <%= link_to comment.user.username, user_path(comment.user), class: "hover:underline text-primary" %>
+          <%= link_to comment.user.username, user_path(username: comment.user.username), data: { turbo: false }, class: "hover:text-red-600 dark:hover:text-red-400 transition-colors" %>
         <% else %>
-          <span class="italic text-gray-500">Unknown User</span>
+          <span class="italic text-gray-500 dark:text-gray-400">Unknown User</span>
         <% end %>
 
         <% if comment.created_at.present? %>
@@ -28,17 +28,18 @@
         <% end %>
       </div>
 
+      <!-- 🗑️ Delete Button (if owner) -->
       <% if comment.user == current_user %>
         <div class="flex gap-2 items-center">
-          <%= button_to "🗑️",
-                        post_comment_path(comment.post, comment),
+          <%= button_to "🗑️", post_comment_path(comment.post, comment),
                         method: :delete,
                         data: { turbo_confirm: "Delete this comment?" },
-                        class: "text-red-500 text-xs bg-transparent border-none p-0" %>
+                        class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs bg-transparent border-none transition-colors" %>
         </div>
       <% end %>
     </div>
 
+    <!-- 💬 Body -->
     <p class="text-gray-900 dark:text-gray-100 mt-1"><%= parse_mentions_to_links(comment.body) %></p>
 
     <!-- ❤️ Like for comment -->
@@ -53,7 +54,7 @@
                       action: "click->reply-form#toggle",
                       reply_form_target: dom_id(comment, :reply_form)
                     },
-                    class: "text-blue-600 hover:underline" %>
+                    class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" %>
       </div>
 
       <!-- Reply Form (toggle target) -->
@@ -68,11 +69,11 @@
     <!-- 🧵 Replies (recursively rendered) -->
     <% if depth < 5 %>
       <div id="<%= dom_id(comment, :comments) %>" class="mt-3 space-y-2">
-        <% comment.replies.each do |reply| %>
+        <% comment.replies.order(created_at: :asc).each do |reply| %>
           <%= render partial: "comments/comment", locals: { comment: reply, depth: depth + 1 } %>
         <% end %>
       </div>
     <% end %>
-    
+
   </div>
 <% end %>

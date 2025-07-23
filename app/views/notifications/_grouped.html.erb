@@ -1,0 +1,41 @@
+<!-- app/views/notifications/_grouped.html.erb -->
+<% count = notification.try(:group_count) || 1 %>
+<% notifiable = notification.notifiable %>
+
+<% content_type = case notifiable
+  when Post then "post"
+  when Comment then notifiable.parent_id.present? ? "reply" : "comment"
+  else notifiable.class.name.downcase
+end %>
+
+<% message = if count > 1
+  case notification.action
+  when "liked"
+    "❤️ #{count} users liked your #{content_type}."
+  when "commented"
+    "💬 #{count} users commented on your #{content_type}."
+  when "replied"
+    "↩️ #{count} users replied to your comment."
+  when "mentioned"
+    "📢 #{count} users mentioned you in a #{content_type}."
+  when "followed"
+    "➕ #{count} users followed you."
+  else
+    "#{count} users #{notification.action} your #{content_type}."
+  end
+else
+  notification.message
+end %>
+
+<% if notifiable.present? %>
+  <div class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 <%= 'bg-red-50 dark:bg-red-900' if notification.read_at.nil? %>">
+    <%= link_to message,
+        mark_as_read_notification_path(notification),
+        data: { turbo: false },
+        class: "text-sm text-gray-800 dark:text-gray-200" %>
+  </div>
+<% else %>
+  <div class="px-4 py-2 text-gray-500 dark:text-gray-400 italic">
+    <%= message %>
+  </div>
+<% end %>

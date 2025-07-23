@@ -1,14 +1,16 @@
-<% post.comments.order(created_at: :asc).limit(limit).each do |comment| %>
-  <div class="mt-2 border-t pt-2 text-sm text-gray-700 dark:text-gray-300">
-    <strong><%= comment.user.username %>:</strong>
-    <%= truncate(parse_mentions_to_links(comment.body), length: 100) %>
-  </div>
+<% post.comments.where(parent_id: nil).order(created_at: :asc).limit(limit).each do |comment| %>
+  <%= render partial: "comments/comment", locals: { comment: comment, depth: 0 } %>
 <% end %>
 
-<% if limit.present? && post.comments.count > limit %>
-    <%= button_to "💬 Load more",
+<% if limit.present? && post.comments.where(parent_id: nil).count > limit %>
+  <%= button_to "💬 Load more",
                 more_comments_post_path(post),
                 method: :get,
                 data: { turbo_frame: "comments_post_#{post.id}" },
-                class: "text-primary hover:underline text-sm mt-2 inline-block bg-transparent border-0 p-0" %>
+                class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium mt-2 inline-block bg-transparent border-0 p-0 transition-colors" %>
+<% end %>
+<% if Rails.env.development? %>
+  <p class="text-sm text-gray-500 dark:text-gray-400">
+    <%= post.comments.count %> total comments
+  </p>
 <% end %>

@@ -9,6 +9,16 @@ class CommentsController < ApplicationController
     if @comment.save
       MentionParser.new(@comment).call
 
+      # ✅ Notification for comment on post
+      unless @comment.user == @post.user
+        Notification.create!(
+          actor: current_user,
+          recipient: @post.user,
+          action: "commented on your post",
+          notifiable: @comment
+        )
+      end
+
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to post_path(@post), notice: "Comment added." }

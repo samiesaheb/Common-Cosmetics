@@ -1,0 +1,12 @@
+<%= turbo_frame_tag "follow_button" do %>
+  <% if user_signed_in? && current_user != user %>
+    <% if current_user.following.include?(user) %>
+      <%= button_to "Unfollow", user_unfollow_path(user), method: :delete,
+            class: "px-4 py-1 rounded bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 mt-2 transition-colors",
+            data: { turbo_confirm: "Are you sure you want to unfollow?" } %>
+    <% else %>
+      <%= button_to "Follow", user_follow_path(user), method: :post,
+            class: "px-4 py-1 rounded bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 mt-2 transition-colors" %>
+    <% end %>
+  <% end %>
+<% end %>

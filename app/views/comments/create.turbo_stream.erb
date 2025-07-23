@@ -1,15 +1,14 @@
-<%= turbo_stream.append dom_id(@comment.parent || @comment.post, :comments) do %>
-  <%= render partial: "comments/comment", locals: { comment: @comment, depth: 0 } %>
-<% end %>
-
-<%# ✅ Clear the reply form if this was a reply %>
 <% if @comment.parent_id.present? %>
+  <%= turbo_stream.append dom_id(@comment.parent, :comments) do %>
+    <%= render partial: "comments/comment", locals: { comment: @comment, depth: 1 } %>
+  <% end %>
   <%= turbo_stream.update dom_id(@comment.parent, :reply_form) do %>
     "" <!-- Clears the nested reply form -->
   <% end %>
-
-<%# ✅ Reset the top-level comment form if this was a new top-level comment %>
 <% else %>
+  <%= turbo_stream.append dom_id(@comment.post, :comments) do %>
+    <%= render partial: "comments/comment", locals: { comment: @comment, depth: 0 } %>
+  <% end %>
   <%= turbo_stream.replace "new_comment_post_#{@post.id}" do %>
     <%= render partial: "comments/form", locals: { post: @post, comment: Comment.new } %>
   <% end %>

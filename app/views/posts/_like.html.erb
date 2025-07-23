@@ -1,0 +1,21 @@
+<% if user_signed_in? %>
+  <%= turbo_frame_tag "like_post_#{post.id}" do %>
+    <div class="mt-4 text-sm">
+      <% if post.likes.exists?(user: current_user) %>
+        <%= button_to post_like_path(post), method: :delete,
+              data: { turbo_frame: "like_post_#{post.id}" },
+              class: "like-button text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 ease-in-out transform active:scale-90 flex items-center gap-2 font-semibold" do %>
+          <span class="heart animate-heart-pop">❤️</span>
+          <%= post.likes.count %>
+        <% end %>
+      <% else %>
+        <%= button_to post_like_path(post), method: :post,
+              data: { turbo_frame: "like_post_#{post.id}" },
+              class: "like-button text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 ease-in-out transform active:scale-90 flex items-center gap-2" do %>
+          <span class="heart animate-heart-pop">🤍</span>
+          <%= post.likes.count %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

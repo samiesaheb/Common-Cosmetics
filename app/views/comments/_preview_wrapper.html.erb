@@ -1,3 +1,16 @@
 <%= turbo_frame_tag "comments_post_#{post.id}" do %>
-  <%= render partial: "comments/preview", locals: { post: post, limit: nil } %>
+  <div class="space-y-2">
+    <% post.comments.where(parent_id: nil).order(created_at: :asc).each do |comment| %>
+      <%= render partial: "comments/comment", locals: { comment: comment, depth: 0 } %>
+    <% end %>
+    <% if user_signed_in? %>
+      <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
+    <% end %>
+    <% if Rails.env.development? %>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Debug: <%= post.comments.where(parent_id: nil).count %> top-level comments,
+        <%= post.comments.count %> total comments
+      </p>
+    <% end %>
+  </div>
 <% end %>

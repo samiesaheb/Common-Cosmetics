@@ -42,7 +42,7 @@ gem "image_processing", "~> 1.2"
 gem "devise"
 gem "rack-cors", require: "rack/cors"
 gem "friendly_id", "~> 5.4.0"
-
+gem "kaminari"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

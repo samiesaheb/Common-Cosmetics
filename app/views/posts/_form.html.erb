@@ -1,0 +1,74 @@
+<div class="w-full max-w-xl mx-auto px-0">
+  <%= form_with model: post, url: posts_path, local: false,
+        html: {
+          multipart: true,
+          class: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+        } do |f| %>
+
+    <!-- ✍️ Caption Label -->
+    <div class="mb-2 w-full">
+      <label for="post_caption" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">What's on your mind?</label>
+    </div>
+
+    <!-- 👤 User Avatar (Clickable) -->
+    <div class="mb-4">
+      <%= link_to user_path(current_user), data: { turbo: false }, class: "inline-block" do %>
+        <% if current_user.avatar.attached? %>
+          <%= image_tag current_user.avatar.variant(resize_to_fill: [40, 40]),
+                class: "w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600" %>
+        <% else %>
+          <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-lg text-gray-500 dark:text-gray-300">👤</div>
+        <% end %>
+      <% end %>
+    </div>
+
+
+    <!-- 📝 Caption Textarea -->
+    <div class="mb-4 w-full">
+      <%= f.text_area :caption,
+          placeholder: "Share your thoughts or mention friends with @username...",
+          rows: 4,
+          class: "w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 resize-y" %>
+    </div>
+
+    <!-- 🖼 Image Upload -->
+    <div class="mb-4 w-full">
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Add an Image</label>
+      <div class="relative">
+        <%= f.file_field :image,
+            class: "block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-red-50 dark:file:bg-red-900 file:text-red-600 dark:file:text-red-400 hover:file:bg-red-100 dark:hover:file:bg-red-800 transition-all duration-200",
+            data: { action: "image-preview#preview" } %>
+      </div>
+    </div>
+
+    <!-- 📸 Image Preview -->
+    <div class="mb-4 w-full">
+      <div class="relative">
+        <img data-image-preview-target="output"
+             class="rounded-lg max-h-80 w-full object-cover hidden border border-gray-200 dark:border-gray-600"
+             alt="Image preview" />
+        <button type="button" data-action="image-preview#remove"
+                class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hidden"
+                data-image-preview-target="removeButton">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ⭐ Star Rating Dropdown -->
+    <div class="mb-4 w-full">
+      <label for="post_rating" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Rate Your Experience</label>
+      <%= f.select :rating, options_for_select(1..5, post.rating || 1),
+              { prompt: "Select a rating" },
+              class: "w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200" %>
+    </div>
+
+    <!-- 🧵 Submit -->
+    <div class="mt-6 flex justify-end">
+      <%= f.submit "Post",
+              class: "px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg text-base transition-colors duration-200 shadow-md" %>
+    </div>
+  <% end %>
+</div>

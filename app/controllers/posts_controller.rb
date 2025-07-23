@@ -4,11 +4,14 @@ class PostsController < ApplicationController
   before_action :authorize_user!, only: [:edit, :update, :destroy]
 
   def index
-    @posts = Post.includes(user: { avatar_attachment: :blob }, image_attachment: :blob).order(created_at: :desc)
+    @posts = Post
+      .includes(user: { avatar_attachment: :blob }, image_attachment: :blob)
+      .order(created_at: :desc)
+      .page(params[:page])
+      .per(10)
   end
 
   def show
-    Rails.logger.debug "✅ PostsController#show loaded with post ID #{params[:id]}"
     @post = Post.find(params[:id])
 
     if user_signed_in? && params[:notification_id].present?
@@ -26,11 +29,19 @@ class PostsController < ApplicationController
 
     if @post.save
       MentionParser.new(@post).call
-      redirect_to @post, notice: "Post created successfully."
+
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to root_path, notice: "Post created successfully." }
+      end
     else
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("new_post_form", partial: "posts/form", locals: { post: @post }) }
+        format.html { render :new, status: :unprocessable_entity }
+      end
     end
   end
+
 
   def edit; end
 
@@ -47,9 +58,24 @@ class PostsController < ApplicationController
     redirect_to posts_path, notice: "Post deleted successfully."
   end
 
+  def more
+    @posts = Post
+      .includes(user: { avatar_attachment: :blob }, image_attachment: :blob)
+      .order(created_at: :desc)
+      .page(params[:page])
+      .per(10)
+
+    render turbo_stream: turbo_stream.append(
+      "posts_list",
+      partial: "posts/post",
+      collection: @posts,
+      as: :post
+    )
+  end
+
   def more_comments
     @post = Post.find(params[:id])
-    @comments = @post.comments.order(:created_at)
+    @comments = @post.comments.where(parent_id: nil).order(created_at: :asc)
 
     render turbo_stream: turbo_stream.replace(
       "comments_post_#{@post.id}",

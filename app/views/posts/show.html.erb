@@ -1,21 +1,21 @@
 <!-- app/views/posts/show.html.erb -->
-<div class="max-w-2xl mx-auto mt-8 bg-gray-950 text-white rounded-xl shadow-lg ring-1 ring-gray-800 p-6">
+<div class="max-w-2xl mx-auto mt-24 bg-white dark:bg-black text-gray-900 dark:text-gray-100 rounded-xl shadow-md ring-1 ring-gray-200 dark:ring-gray-800 p-6">
   <!-- 👤 Post Header -->
   <div class="flex items-center gap-4 mb-4">
     <% if @post.user.avatar.attached? %>
       <%= image_tag @post.user.avatar.variant(resize_to_fill: [48, 48]), class: "w-12 h-12 rounded-full object-cover" %>
     <% else %>
-      <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-xl text-gray-300">👤</div>
+      <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xl text-gray-500 dark:text-gray-300">👤</div>
     <% end %>
 
     <div>
-      <%= link_to @post.user.username, user_path(@post.user), class: "text-lg font-bold text-white hover:underline" %>
-      <p class="text-sm text-gray-400">Posted <%= time_ago_in_words(@post.created_at) %> ago</p>
+      <%= link_to @post.user.username, user_path(@post.user), class: "text-lg font-semibold text-primary hover:underline" %>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Posted <%= time_ago_in_words(@post.created_at) %> ago</p>
     </div>
   </div>
 
   <!-- 📝 Post Caption -->
-  <p class="text-base text-gray-100 mb-2"><%= parse_mentions_to_links(@post.caption) %></p>
+  <p class="text-base mb-3 leading-relaxed"><%= parse_mentions_to_links(@post.caption) %></p>
 
   <!-- ⭐ Star Rating -->
   <div class="flex items-center text-yellow-400 text-sm mb-4">
@@ -23,61 +23,64 @@
       <% if i < @post.rating %>
         <span>★</span>
       <% else %>
-        <span class="text-gray-600 dark:text-gray-700">☆</span>
+        <span class="text-gray-300 dark:text-gray-700">☆</span>
       <% end %>
     <% end %>
   </div>
 
   <!-- 🖼️ Post Image -->
   <% if @post.image.attached? %>
-    <%= image_tag @post.image.variant(resize_to_limit: [800, 500]),
-          class: "rounded-lg w-full object-cover border border-gray-800 max-h-[500px] mb-4" %>
+    <%= image_tag @post.image.variant(resize_to_limit: [800, 500]), class: "rounded-lg w-full object-cover border border-gray-200 dark:border-gray-800 max-h-[500px] mb-4" %>
   <% end %>
 
-  <!-- ❤️ Like/Unlike Buttons -->
+  <!-- ❤️ Like/Unlike Toggle -->
   <% if user_signed_in? %>
     <%= turbo_frame_tag "like_post_#{@post.id}" do %>
-      <div class="mb-6 flex items-center gap-3 text-sm">
+      <div class="mb-6 text-sm">
         <% if @post.likes.exists?(user: current_user) %>
-          <%= button_to "💔 Unlike", post_like_path(@post), method: :delete,
+          <%= button_to post_like_path(@post), method: :delete,
                 data: { turbo_frame: "like_post_#{@post.id}" },
-                class: "text-red-600 hover:underline" %>
+                class: "flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors font-semibold" do %>
+            ❤️ <%= @post.likes.count %>
+          <% end %>
         <% else %>
-          <%= button_to "❤️ Like", post_like_path(@post), method: :post,
+          <%= button_to post_like_path(@post), method: :post,
                 data: { turbo_frame: "like_post_#{@post.id}" },
-                class: "text-gray-300 hover:underline" %>
+                class: "flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors" do %>
+            🤍 <%= @post.likes.count %>
+          <% end %>
         <% end %>
-        <span class="text-gray-400"><%= @post.likes.count %> likes</span>
       </div>
     <% end %>
   <% end %>
 
+
   <!-- ✏️ Edit / 🗑️ Delete Buttons -->
   <% if user_signed_in? && current_user == @post.user %>
     <div class="mb-4 flex gap-4 text-sm">
-      <%= link_to "✏️ Edit", edit_post_path(@post), class: "text-blue-400 hover:underline" %>
-      <%= button_to "🗑️ Delete", post_path(@post), method: :delete,
+      <%= link_to "Edit", edit_post_path(@post), class: "text-blue-600 hover:underline" %>
+      <%= button_to "Delete", post_path(@post), method: :delete,
             data: { confirm: "Are you sure?" },
-            class: "text-red-500 hover:underline bg-transparent border-none" %>
+            class: "text-red-600 hover:underline bg-transparent border-none" %>
     </div>
   <% end %>
 
-  <hr class="my-6 border-gray-700" />
+  <hr class="my-6 border-gray-200 dark:border-gray-700" />
 
   <!-- 💬 Comments Header -->
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-lg font-semibold">💬 Comments</h2>
-    <p class="text-sm text-gray-400"><%= pluralize(@post.comments.count, "comment") %></p>
+    <p class="text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@post.comments.count, "comment") %></p>
   </div>
 
-  <!-- 🧵 Comments Preview + Form wrapped in Turbo Frame -->
+  <!-- 🧵 Comments Preview + Form -->
   <%= turbo_frame_tag "comments_post_#{@post.id}" do %>
     <%= render partial: "comments/preview", locals: { post: @post, limit: nil } %>
 
     <% if user_signed_in? %>
       <%= render partial: "comments/form", locals: { post: @post, comment: @post.comments.build } %>
     <% else %>
-      <p class="text-gray-400 text-sm mb-4">You must be logged in to comment.</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">You must be logged in to comment.</p>
     <% end %>
   <% end %>
 </div>

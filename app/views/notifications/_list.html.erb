@@ -1,0 +1,6 @@
+<!-- app/views/notifications/_list.html.erb -->
+<%= turbo_frame_tag "notifications" do %>
+  <div class="divide-y divide-gray-100 dark:divide-gray-700">
+    <%= render partial: "notifications/grouped", collection: notifications, as: :notification %>
+  </div>
+<% end %>

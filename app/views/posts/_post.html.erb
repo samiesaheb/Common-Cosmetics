@@ -1,45 +1,77 @@
-<div class="bg-gray-900 text-white dark:bg-gray-900 dark:text-white shadow rounded-lg p-4 mb-6">
-  <!-- 🧑‍🎤 Avatar + Username -->
-  <div class="flex items-center gap-2 mb-2">
-    <% if post.user.avatar.attached? %>
-      <%= image_tag url_for(post.user.avatar), class: "w-8 h-8 rounded-full object-cover" %>
-      <p class="text-xs text-gray-500"><%= url_for(post.user.avatar) %></p> <!-- TEMP: shows the raw URL for debugging -->
+<%= turbo_frame_tag dom_id(post) do %>
+  <div class="w-full max-w-xl mx-auto bg-white dark:bg-gray-900 shadow-md rounded-xl p-6 transition-shadow hover:shadow-lg">
+  
+    <!-- 🧑‍🎤 Avatar + Username + Rating -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <%= link_to user_path(username: post.user.username), data: { turbo: false }, class: "block" do %>
+          <% if post.user.avatar.attached? %>
+            <%= image_tag post.user.avatar.variant(resize_to_fill: [40, 40]),
+                  class: "w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700" %>
+          <% else %>
+            <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">👤</div>
+          <% end %>
+        <% end %>
+
+        <%= link_to post.user.username,
+              user_path(username: post.user.username),
+              data: { turbo: false },
+              class: "font-semibold text-gray-800 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors" %>
+      </div>
+      <span class="text-sm text-gray-500 dark:text-gray-400">⭐ <%= post.rating %>/5</span>
+    </div>
+
+    <!-- 📝 Post Caption -->
+    <p class="text-base text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
+      <%= parse_mentions_to_links(post.caption) %>
+    </p>
+
+    <!-- 📸 Post Image -->
+    <% if post.image.attached? %>
+      <div class="mb-4">
+        <%= link_to post_path(post), data: { turbo: false } do %>
+          <%= image_tag post.image.variant(resize_to_limit: [600, 400]), class: "rounded-lg w-full object-cover border border-gray-200 dark:border-gray-700" %>
+        <% end %>
+      </div>
     <% else %>
-      <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-500">
-        👤
+      <%= link_to "View Post", post_path(post), data: { turbo: false }, class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition-colors" %>
+    <% end %>
+
+    <!-- ✏️ Edit/Delete (if owner) -->
+    <% if post.user == current_user %>
+      <div class="mt-4 flex gap-4 text-sm">
+        <%= link_to "Edit", edit_post_path(post), class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" %>
+        <%= button_to "Delete", post_path(post), method: :delete,
+            data: { confirm: "Are you sure?" },
+            class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors bg-transparent border-none" %>
       </div>
     <% end %>
-    <span class="font-semibold text-gray-300 dark:text-gray-200">
-      <%= post.user.username %>
-    </span>
-  </div>
 
-  <!-- 📝 Post Caption -->
-  <p class="mb-2 text-gray-100"><%= parse_mentions_to_links(post.caption) %></p>
-
-  <!-- 📸 Post Image -->
-  <% if post.image.attached? %>
-    <div class="mb-4">
-      <%= image_tag post.image.variant(resize_to_limit: [800, 800]),
-            class: "rounded-lg w-full object-cover border border-gray-800" %>
-    </div>
-  <% end %>
-
-  <!-- 💬 Comments Preview + Show More Button -->
-  <% latest_comments = post.comments.order(created_at: :desc).limit(2).reverse %>
-
-  <%= turbo_frame_tag "comments-for-post-#{post.id}" do %>
-    <%= render partial: "comments/comment", collection: latest_comments, as: :comment %>
-
-    <% if post.comments.count > 2 %>
-      <%= button_to "Show more comments", 
-          more_comments_post_path(post), 
-          method: :get, 
-          data: { turbo_frame: "comments-for-post-#{post.id}" },
-          class: "text-sm text-blue-400 hover:underline mt-2" %>
+    <!-- ❤️ Like Button (modular version) -->
+    <% if user_signed_in? %>
+      <%= turbo_frame_tag "like_post_#{post.id}" do %>
+        <%= render partial: "posts/like", locals: { post: post } %>
+      <% end %>
     <% end %>
-  <% end %>
 
-  <!-- ➕ Comment Form -->
-  <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
-</div>
+    <!-- 💬 Comments Preview + Show More Button -->
+    <% latest_comments = post.comments.where(parent_id: nil).order(created_at: :asc).limit(2) %>
+    <%= turbo_frame_tag "comments_post_#{post.id}" do %>
+      <%= render partial: "comments/comment", collection: latest_comments, as: :comment %>
+      <% if post.comments.where(parent_id: nil).count > 2 %>
+        <%= button_to "Show more comments",
+            more_comments_post_path(post),
+            method: :get,
+            data: { turbo_frame: "comments_post_#{post.id}" },
+            class: "text-sm text-blue-400 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors mt-2" %>
+      <% end %>
+    <% end %>
+
+    <!-- ➕ Comment Form -->
+    <% if user_signed_in? %>
+      <div class="mt-4">
+        <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

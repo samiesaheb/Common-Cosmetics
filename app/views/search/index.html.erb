@@ -1,0 +1,56 @@
+<div class="max-w-2xl mx-auto mt-8 space-y-8">
+  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">🔍 Search Results</h2>
+
+  <!-- 👥 User Results -->
+  <div>
+    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Users</h3>
+
+    <% if @users.any? %>
+      <ul class="space-y-4">
+        <% @users.each do |user| %>
+          <li class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+              <% if user.avatar.attached? %>
+                <%= image_tag user.avatar.variant(resize_to_fill: [40, 40]), class: "w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600" %>
+              <% else %>
+                <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">👤</div>
+              <% end %>
+
+              <%= link_to user.username, user_path(user), class: "font-semibold text-gray-800 dark:text-gray-100 hover:underline" %>
+            </div>
+
+            <% if user_signed_in? && current_user != user %>
+              <div>
+                <%= turbo_frame_tag "follow_button_user_#{user.id}" do %>
+                  <% if current_user.following.include?(user) %>
+                    <%= button_to "Unfollow", user_unfollow_path(user), method: :delete,
+                          data: { turbo_frame: "follow_button_user_#{user.id}" },
+                          class: "text-sm px-3 py-1 rounded bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition" %>
+                  <% else %>
+                    <%= button_to "Follow", user_follow_path(user), method: :post,
+                          data: { turbo_frame: "follow_button_user_#{user.id}" },
+                          class: "text-sm px-3 py-1 rounded bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition" %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-gray-500 dark:text-gray-400">No matching users found.</p>
+    <% end %>
+  </div>
+
+  <!-- 🧴 Post Results -->
+  <div>
+    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Posts</h3>
+    <% if @posts.any? %>
+      <div class="space-y-6">
+        <%= render partial: "posts/post", collection: @posts, as: :post %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 dark:text-gray-400">No matching posts found.</p>
+    <% end %>
+  </div>
+</div>

@@ -1,3 +1,18 @@
+<%= turbo_stream.replace "notifications" do %>
+  <div class="divide-y divide-gray-100 dark:divide-gray-700 space-y-2">
+    <% current_user.notifications.grouped.each do |notification| %>
+      <div class="py-2 flex justify-between items-center">
+        <div>
+          <p class="text-sm text-gray-800 dark:text-gray-100"><%= notification.message %></p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            <%= time_ago_in_words(notification.created_at) %> ago
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
 <%= turbo_stream.replace "notification-count" do %>
-  <%= render partial: "notifications/count" %>
+  <%= render partial: "notifications/count", locals: { count: 0 } %>
 <% end %>

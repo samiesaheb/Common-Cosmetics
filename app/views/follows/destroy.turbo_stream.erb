@@ -1,0 +1,14 @@
+<%= turbo_stream.replace "follow_button", partial: "users/follow_button", locals: { user: @user } %>
+<%= turbo_stream.replace "follower_counts", partial: "users/follower_counts", locals: { user: @user } %>
+
+<%= turbo_stream.replace "follow_button_user_#{@user.id}" do %>
+  <% if current_user.following.include?(@user) %>
+    <%= button_to "Unfollow", user_unfollow_path(@user), method: :delete,
+          data: { turbo_frame: "follow_button_user_#{@user.id}" },
+          class: "text-sm px-3 py-1 rounded bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition" %>
+  <% else %>
+    <%= button_to "Follow", user_follow_path(@user), method: :post,
+          data: { turbo_frame: "follow_button_user_#{@user.id}" },
+          class: "text-sm px-3 py-1 rounded bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition" %>
+  <% end %>
+<% end %>

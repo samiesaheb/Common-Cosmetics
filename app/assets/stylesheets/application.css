@@ -9,3 +9,25 @@
 .mention {
   @apply text-red-500 hover:underline font-medium;
 }
+
+/* Ensure x-cloak hides elements */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Ensure dropdowns are positioned correctly */
+.dropdown {
+  position: absolute !important;
+  z-index: 1000 !important;
+  overflow: visible !important;
+}
+
+/* Prevent navbar clipping */
+nav {
+  overflow: visible !important;
+}
+
+/* Ensure body and main do not clip dropdowns */
+body, main {
+  overflow: visible !important;
+}

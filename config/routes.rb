@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   get "users/show"
   get "notifications/index"
+
   # Devise authentication routes
   devise_for :users, controllers: {
     registrations: "users/registrations"
@@ -12,16 +13,16 @@ Rails.application.routes.draw do
   # Root path
   root "posts#index"
 
+  # 🔍 MOVE THIS UP — before `resources :users`
+  get "users/autocomplete", to: "users#autocomplete"
+
   # Posts with nested comments and likes
   resources :posts do
+    get :more, on: :collection
     get :more_comments, on: :member
 
-    # Post likes (❤️)
-    resource :like, only: [:create, :destroy]
-
-    # Comments on posts
+    resource :like, only: [:create, :destroy], controller: 'post_likes'
     resources :comments, only: [:create, :destroy] do
-      # Comment likes (❤️)
       resource :like, only: [:create, :destroy], controller: "comment_likes"
     end
   end
@@ -32,16 +33,15 @@ Rails.application.routes.draw do
     end
 
     member do
-      post :mark_as_read
+      get :mark_as_read
     end
   end
 
+  # ✅ This must come after `autocomplete`
   resources :users, only: [:show], param: :username do
-    post :follow, to: "follows#create"
-    delete :unfollow, to: "follows#destroy"
+    post :follow, to: "follows#create", as: :follow
+    delete :unfollow, to: "follows#destroy", as: :unfollow
   end
 
-  get "users/autocomplete", to: "users#autocomplete"
-
-
+  get "search", to: "search#index", as: :search
 end

@@ -1,43 +1,64 @@
-<!-- posts/_profile_post.html.erb -->
-<div class="bg-gray-900 border border-gray-800 rounded-lg p-4 space-y-3">
-  <!-- 👤 Avatar + Username -->
-  <div class="flex items-center gap-2 text-sm text-gray-400">
-    <% if post.user.avatar.attached? %>
-      <%= image_tag post.user.avatar.variant(resize_to_fill: [24, 24]), class: "w-6 h-6 rounded-full object-cover" %>
-    <% else %>
-      <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-gray-400">👤</div>
-    <% end %>
-    <%= link_to post.user.username, user_path(post.user), class: "hover:underline" %>
-  </div>
+<%= turbo_frame_tag dom_id(post) do %>
+  <!-- Centered post card -->
+  <div class="flex justify-center mb-6">
+    <div class="w-full max-w-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 transition-shadow hover:shadow-lg">
+      
+      <!-- 👤 Avatar + Username -->
+      <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+        <% if post.user.avatar.attached? %>
+          <%= image_tag post.user.avatar.variant(resize_to_fill: [32, 32]), class: "w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700" %>
+        <% else %>
+          <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">👤</div>
+        <% end %>
+        <%= link_to post.user.username, user_path(username: post.user.username), data: { turbo: false }, class: "font-semibold text-gray-800 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors" %>
+      </div>
 
-  <!-- ✏️ Caption -->
-  <p class="text-sm text-gray-100"><%= parse_mentions_to_links(post.caption) %></p>
+      <!-- ✏️ Caption -->
+      <p class="text-base text-gray-900 dark:text-gray-100 leading-relaxed mt-2">
+        <%= parse_mentions_to_links(post.caption) %>
+      </p>
 
-  <!-- ⭐ Star Rating -->
-  <div class="flex items-center text-yellow-400 text-sm mt-1">
-    <% 5.times do |i| %>
-      <% if i < post.rating %>
-        <span>★</span>
-      <% else %>
-        <span class="text-gray-600 dark:text-gray-700">☆</span>
+      <!-- ⭐ Star Rating -->
+      <div class="flex items-center text-yellow-400 text-sm mt-2">
+        <% 5.times do |i| %>
+          <% if i < post.rating %>
+            <span>★</span>
+          <% else %>
+            <span class="text-gray-400 dark:text-gray-600">☆</span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- 🖼️ Image -->
+      <% if post.image.attached? %>
+        <div class="mt-4">
+          <%= image_tag post.image.variant(resize_to_limit: [800, 800]), class: "rounded-lg w-full h-auto object-cover border border-gray-200 dark:border-gray-800" %>
+        </div>
       <% end %>
-    <% end %>
+
+      <!-- 💬 Comment Count -->
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
+        💬 <%= pluralize(post.comments.where(parent_id: nil).count, "comment") %>
+        <% if Rails.env.development? %>
+          (Total: <%= post.comments.count %>)
+        <% end %>
+      </p>
+
+      <!-- 💬 Comments Preview + Form -->
+      <%= turbo_frame_tag "comments_post_#{post.id}" do %>
+        <%= render partial: "comments/preview", locals: { post: post, limit: 3 } %>
+        <% if post.comments.where(parent_id: nil).count > 3 %>
+          <%= button_to "Show more comments",
+              more_comments_post_path(post),
+              method: :get,
+              data: { turbo_frame: "comments_post_#{post.id}" },
+              class: "text-sm text-blue-400 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors mt-2" %>
+        <% end %>
+        <% if user_signed_in? %>
+          <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
+        <% end %>
+      <% end %>
+      
+    </div>
   </div>
-
-  <!-- 🖼️ Image -->
-  <% if post.image.attached? %>
-    <%= image_tag post.image.variant(resize_to_limit: [500, 500]),
-          class: "rounded-lg max-w-full mx-auto object-cover border border-gray-800" %>
-  <% end %>
-
-  <!-- 💬 Comment Count -->
-  <p class="text-sm text-gray-400 mt-2">
-    💬 <%= pluralize(post.comments.count, "comment") %>
-  </p>
-
-  <!-- 💬 Comments Preview + Form (Turbo Frame!) -->
-  <%= turbo_frame_tag "comments_post_#{post.id}" do %>
-    <%= render partial: "comments/preview", locals: { post: post, limit: 2 } %>
-    <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
-  <% end %>
-</div>
+<% end %>

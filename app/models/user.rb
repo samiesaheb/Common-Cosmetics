@@ -32,4 +32,10 @@ class User < ApplicationRecord
   has_many :mentioned_in, through: :mentions, source: :mentionable, source_type: 'Post'
   has_many :mentioned_comments, through: :mentions, source: :mentionable, source_type: 'Comment'
 
+  validates :bio, length: { maximum: 500 }
+
+  def avatar_url
+    avatar.attached? ? Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_fill: [32, 32]), only_path: true) : nil
+  end
+
 end
