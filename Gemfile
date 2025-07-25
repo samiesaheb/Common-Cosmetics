@@ -42,7 +42,7 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 gem "devise"
 gem "rack-cors", require: "rack/cors"
-gem "friendly_id", "~> 5.4.0"
+gem "friendly_id", "~> 5.5.1"
 gem "kaminari"
 gem "redis", "~> 5.0"
 gem "dotenv-rails"
