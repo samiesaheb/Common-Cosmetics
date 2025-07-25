@@ -7,8 +7,16 @@
     <div class="flex justify-between items-start">
       <!-- 🧑‍💬 Avatar + Username + Time -->
       <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
-        <% if comment.user&.avatar&.attached? %>
-          <%= image_tag comment.user.avatar.variant(resize_to_fill: [24, 24]), class: "w-6 h-6 rounded-full object-cover border border-gray-200 dark:border-gray-700" %>
+        <% if comment.user.present? %>
+          <%= link_to user_path(username: comment.user.username), data: { turbo: false } do %>
+            <% if comment.user.avatar.attached? %>
+              <%= image_tag comment.user.avatar.variant(resize_to_fill: [24, 24]), class: "w-6 h-6 rounded-full object-cover border border-gray-200 dark:border-gray-700" %>
+            <% else %>
+              <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                👤
+              </div>
+            <% end %>
+          <% end %>
         <% else %>
           <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
             👤
@@ -28,10 +36,10 @@
         <% end %>
       </div>
 
-      <!-- 🗑️ Delete Button (if owner) -->
+      <!-- 🧼 Delete Button (if owner) -->
       <% if comment.user == current_user %>
         <div class="flex gap-2 items-center">
-          <%= button_to "🗑️", post_comment_path(comment.post, comment),
+          <%= button_to "Delete", post_comment_path(comment.post, comment),
                         method: :delete,
                         data: { turbo_confirm: "Delete this comment?" },
                         class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs bg-transparent border-none transition-colors" %>

@@ -1,0 +1,24 @@
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md p-4">
+  <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">People you may like</h3>
+
+  <% suggested_users.each do |user| %>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <% if user.avatar.attached? %>
+          <%= image_tag user.avatar.variant(resize_to_fill: [32, 32]),
+                class: "w-8 h-8 rounded-full object-cover border border-gray-300 dark:border-gray-700" %>
+        <% else %>
+          <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">👤</div>
+        <% end %>
+        <%= link_to user.username, user_path(username: user.username),
+              class: "font-medium text-gray-700 dark:text-gray-300 hover:text-red-500 transition-colors" %>
+      </div>
+
+      <%= button_to follows_path(followed_id: user.id),
+            method: :post,
+            class: "text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full transition-colors" do %>
+        Follow
+      <% end %>
+    </div>
+  <% end %>
+</div>

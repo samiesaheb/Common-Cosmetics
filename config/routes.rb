@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  
+  mount ActionCable.server => '/cable'
+
+  get "bookmarks/create"
+  get "bookmarks/destroy"
   get "users/show"
   get "notifications/index"
 
@@ -25,6 +30,9 @@ Rails.application.routes.draw do
     resources :comments, only: [:create, :destroy] do
       resource :like, only: [:create, :destroy], controller: "comment_likes"
     end
+    
+    resource :bookmark, only: [:create, :destroy]
+    resource :repost, only: [:create, :destroy]
   end
 
   resources :notifications, only: [:index] do
@@ -44,4 +52,13 @@ Rails.application.routes.draw do
   end
 
   get "search", to: "search#index", as: :search
+
+  resources :conversations, only: [:index, :show, :create] do
+    resources :messages, only: [:create, :destroy]
+    member do
+      post :update_typing
+    end
+  end
+
+  resources :product_tags, only: [:index, :show]
 end

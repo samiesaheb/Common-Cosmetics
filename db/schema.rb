@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_20_093413) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_24_135942) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_093413) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "bookmarks", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "post_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id"], name: "index_bookmarks_on_post_id"
+    t.index ["user_id"], name: "index_bookmarks_on_user_id"
+  end
+
+  create_table "chat_messages", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_chat_messages_on_user_id"
+  end
+
   create_table "comment_likes", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "comment_id", null: false
@@ -60,6 +77,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_093413) do
     t.integer "parent_id"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "conversations", force: :cascade do |t|
+    t.bigint "sender_id"
+    t.bigint "receiver_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "typing"
+    t.bigint "last_typing_user_id"
+    t.index ["last_typing_user_id"], name: "index_conversations_on_last_typing_user_id"
+    t.index ["receiver_id"], name: "index_conversations_on_receiver_id"
+    t.index ["sender_id"], name: "index_conversations_on_sender_id"
   end
 
   create_table "follows", force: :cascade do |t|
@@ -101,6 +130,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_093413) do
     t.index ["user_id"], name: "index_mentions_on_user_id"
   end
 
+  create_table "messages", force: :cascade do |t|
+    t.bigint "conversation_id", null: false
+    t.bigint "user_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "read"
+    t.index ["conversation_id"], name: "index_messages_on_conversation_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.string "recipient_type", null: false
     t.bigint "recipient_id", null: false
@@ -116,13 +156,42 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_093413) do
     t.index ["recipient_type", "recipient_id"], name: "index_notifications_on_recipient"
   end
 
+  create_table "post_product_tags", force: :cascade do |t|
+    t.bigint "post_id", null: false
+    t.bigint "product_tag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id"], name: "index_post_product_tags_on_post_id"
+    t.index ["product_tag_id"], name: "index_post_product_tags_on_product_tag_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.text "caption"
     t.integer "rating"
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "original_post_id"
+    t.integer "repost_id"
+    t.index ["original_post_id"], name: "index_posts_on_original_post_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
+  end
+
+  create_table "product_tags", force: :cascade do |t|
+    t.string "name"
+    t.string "slug", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_product_tags_on_slug", unique: true
+  end
+
+  create_table "reposts", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "post_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id"], name: "index_reposts_on_post_id"
+    t.index ["user_id"], name: "index_reposts_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -143,15 +212,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_093413) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "bookmarks", "posts"
+  add_foreign_key "bookmarks", "users"
+  add_foreign_key "chat_messages", "users"
   add_foreign_key "comment_likes", "comments"
   add_foreign_key "comment_likes", "users"
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
+  add_foreign_key "conversations", "users", column: "last_typing_user_id"
+  add_foreign_key "conversations", "users", column: "receiver_id"
+  add_foreign_key "conversations", "users", column: "sender_id"
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "likes", "posts"
   add_foreign_key "likes", "users"
   add_foreign_key "mentions", "users"
+  add_foreign_key "messages", "conversations"
+  add_foreign_key "messages", "users"
   add_foreign_key "notifications", "users", column: "actor_id"
+  add_foreign_key "post_product_tags", "posts"
+  add_foreign_key "post_product_tags", "product_tags"
+  add_foreign_key "posts", "posts", column: "original_post_id"
   add_foreign_key "posts", "users"
+  add_foreign_key "reposts", "posts"
+  add_foreign_key "reposts", "users"
 end

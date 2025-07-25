@@ -10,18 +10,13 @@ class Like < ApplicationRecord
   private
 
   def notify_recipient
-    return if post.user == user # don't notify self
+    return if post.user == user || post.user.nil? # ✅ no self-notify, guard nil
 
-    def notify_recipient
-      return if post.user == user # don't notify self
-
-      Notification.create!(
-        recipient: post.user,
-        notifiable: post,
-        actor: user,             # 👈 YOU NEED THIS
-        action: "liked"
-      )
-    end
+    Notification.create!(
+      recipient: post.user,
+      notifiable: post,
+      actor: user,             # ✅ this ensures correct grammar
+      action: "liked"
+    )
   end
-
 end

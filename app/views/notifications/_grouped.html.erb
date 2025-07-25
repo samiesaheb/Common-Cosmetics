@@ -27,13 +27,20 @@ else
   notification.message
 end %>
 
+<% path = case notifiable
+  when Post then post_path(notifiable)
+  when Comment then post_path(notifiable.post, anchor: dom_id(notifiable))
+  else "#"
+end %>
+
 <% if notifiable.present? %>
-  <div class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 <%= 'bg-red-50 dark:bg-red-900' if notification.read_at.nil? %>">
-    <%= link_to message,
-        mark_as_read_notification_path(notification),
-        data: { turbo: false },
-        class: "text-sm text-gray-800 dark:text-gray-200" %>
-  </div>
+  <%= link_to mark_as_read_notification_path(notification, redirect_to: path),
+              data: { turbo_frame: "_top" },
+              class: "block" do %>
+    <div id="<%= dom_id(notification) %>" class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 <%= 'bg-red-50 dark:bg-red-900' if notification.read_at.nil? %>">
+      <p class="text-sm text-gray-800 dark:text-gray-200"><%= message %></p>
+    </div>
+  <% end %>
 <% else %>
   <div class="px-4 py-2 text-gray-500 dark:text-gray-400 italic">
     <%= message %>

@@ -42,15 +42,93 @@
     <% end %>
   </div>
 
+  <!-- ⭐ Rating Filter for Posts -->
+  <div>
+    <form method="get" action="<%= search_path %>" class="flex flex-wrap items-center gap-4 mb-4">
+      <input type="hidden" name="q" value="<%= params[:q] %>">
+      <input type="hidden" name="sort" value="<%= params[:sort] %>">
+
+      <label for="rating" class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter posts by rating:</label>
+      <select name="rating" id="rating"
+        class="text-sm rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 px-3 py-2">
+        <option value="">All Ratings</option>
+        <% (1..5).each do |r| %>
+          <option value="<%= r %>" <%= "selected" if params[:rating].to_s == r.to_s %>><%= r %> stars</option>
+        <% end %>
+      </select>
+
+      <button type="submit"
+        class="bg-red-600 text-white text-sm px-4 py-2 rounded-md hover:bg-red-700 transition">
+        Apply
+      </button>
+    </form>
+  </div>
+
+  <!-- 🔽 Sorting -->
+  <div class="mb-4">
+    <%= form_with url: search_path, method: :get, local: true, class: "flex gap-3 items-center" do |f| %>
+      <input type="hidden" name="q" value="<%= params[:q] %>">
+      <input type="hidden" name="rating" value="<%= params[:rating] %>">
+
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</label>
+      <%= select_tag :sort,
+          options_for_select([["Most Recent", "recent"], ["Top Rated", "top_rated"], ["Most Commented", "most_commented"]],
+                            selected: params[:sort]),
+          class: "text-sm rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1",
+          onchange: "this.form.submit();" %>
+    <% end %>
+  </div>
+
   <!-- 🧴 Post Results -->
   <div>
     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Posts</h3>
+
     <% if @posts.any? %>
       <div class="space-y-6">
-        <%= render partial: "posts/post", collection: @posts, as: :post %>
+        <% @posts.each do |post| %>
+          <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+
+            <!-- 🧑 Author + Timestamp -->
+            <div class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+              <%= link_to "@#{post.user.username}", user_path(post.user), class: "font-medium text-primary hover:underline" %> •
+              <%= time_ago_in_words(post.created_at) %> ago
+            </div>
+
+            <!-- 📝 Caption -->
+            <% if post.caption.present? %>
+              <p class="text-gray-900 dark:text-gray-100 mb-2">
+                <%= highlight_match(parse_mentions_to_links(post.caption), @query) %>
+              </p>
+            <% end %>
+
+            <!-- 🏷️ Product Tags -->
+            <% if post.product_tags.any? %>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                🏷️
+                <% post.product_tags.each do |tag| %>
+                  <% if @query.present? && tag.name.to_s.downcase.include?(@query.downcase) %>
+                    <%= link_to highlight_match(tag.name, @query), product_tag_path(tag),
+                          class: "underline font-semibold hover:text-red-500 dark:hover:text-red-400" %>
+                  <% else %>
+                    <%= link_to tag.name, product_tag_path(tag),
+                          class: "underline hover:text-red-500 dark:hover:text-red-400" %>
+                  <% end %>
+                  <% unless tag == post.product_tags.last %>, <% end %>
+                <% end %>
+              </div>
+            <% end %>
+
+            <!-- 🔗 View Post Link -->
+            <div>
+              <%= link_to "View Post", post_path(post),
+                    class: "inline-block mt-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:underline" %>
+            </div>
+          </div>
+        <% end %>
       </div>
     <% else %>
       <p class="text-gray-500 dark:text-gray-400">No matching posts found.</p>
     <% end %>
   </div>
-</div>
+
+

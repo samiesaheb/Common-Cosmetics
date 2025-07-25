@@ -1,0 +1,4 @@
+<% typing_user = conversation.typing_user %>
+<% if typing_user && typing_user != current_user %>
+  <p class="text-sm text-gray-500 mt-2 animate-pulse">💬 <%= typing_user.username %> is typing...</p>
+<% end %>

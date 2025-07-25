@@ -1,2 +1,8 @@
-<%= turbo_stream.prepend "posts_list", partial: "posts/post", locals: { post: @post } %>
-<%= turbo_stream.replace "new_post_form", partial: "posts/form", locals: { post: Post.new } %>
+<%= turbo_stream.replace "flash", partial: "layouts/flash", locals: { notice: "Post created successfully." } %>
+
+<% if @post.repost? %>
+  <%= turbo_stream.redirect(url: root_path) %>
+<% else %>
+  <%= turbo_stream.prepend "posts_list", partial: "posts/post", locals: { post: @post } %>
+  <%= turbo_stream.replace "new_post_form", partial: "posts/form", locals: { post: Post.new } %>
+<% end %>

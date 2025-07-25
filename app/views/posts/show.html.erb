@@ -1,4 +1,3 @@
-<!-- app/views/posts/show.html.erb -->
 <div class="max-w-2xl mx-auto mt-24 bg-white dark:bg-black text-gray-900 dark:text-gray-100 rounded-xl shadow-md ring-1 ring-gray-200 dark:ring-gray-800 p-6">
   <!-- 👤 Post Header -->
   <div class="flex items-center gap-4 mb-4">
@@ -14,23 +13,73 @@
     </div>
   </div>
 
-  <!-- 📝 Post Caption -->
-  <p class="text-base mb-3 leading-relaxed"><%= parse_mentions_to_links(@post.caption) %></p>
+  <!-- 📝 Caption -->
+  <% if @post.repost? %>
+    <% if @post.caption.present? %>
+      <!-- 📝 Caption for quote repost -->
+      <p class="text-base mb-3 leading-relaxed">
+        <%= parse_mentions_to_links(@post.caption) %>
+      </p>
+    <% end %>
+  <% else %>
+    <!-- 📝 Caption for original post -->
+    <p class="text-base mb-3 leading-relaxed">
+      <%= parse_mentions_to_links(@post.caption) %>
+    </p>
+  <% end %>
+
+
+  <!-- 🔁 Quoted Repost Block -->
+  <% if @post.repost? && @post.original_post.present? %>
+    <div class="border-l-4 border-red-500 bg-gray-50 dark:bg-gray-800 text-sm px-4 py-3 rounded mb-4">
+      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+        <span>🔁</span>
+        Quoted from <%= link_to "@#{@post.original_post.user.username}", user_path(username: @post.original_post.user.username), class: "hover:underline" %> ·
+        <%= time_ago_in_words(@post.original_post.created_at) %> ago ·
+        <%= link_to "View Post", post_path(@post.original_post), class: "hover:underline" %>
+      </p>
+
+      <% if @post.original_post.caption.present? %>
+        <p class="text-gray-700 dark:text-gray-300 italic">
+          <%= parse_mentions_to_links(@post.original_post.caption) %>
+        </p>
+      <% end %>
+
+      <% if @post.original_post.image.attached? %>
+        <div class="mt-2">
+          <%= image_tag @post.original_post.image.variant(resize_to_limit: [600, 400]),
+              class: "rounded-lg w-full object-cover border border-gray-300 dark:border-gray-700" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 
   <!-- ⭐ Star Rating -->
-  <div class="flex items-center text-yellow-400 text-sm mb-4">
-    <% 5.times do |i| %>
-      <% if i < @post.rating %>
-        <span>★</span>
-      <% else %>
-        <span class="text-gray-300 dark:text-gray-700">☆</span>
+  <% if @post.rating.present? %>
+    <div class="flex items-center text-yellow-400 text-sm mb-4">
+      <% 5.times do |i| %>
+        <% if i < @post.rating %>
+          <span>★</span>
+        <% else %>
+          <span class="text-gray-300 dark:text-gray-700">☆</span>
+        <% end %>
       <% end %>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 
   <!-- 🖼️ Post Image -->
   <% if @post.image.attached? %>
     <%= image_tag @post.image.variant(resize_to_limit: [800, 500]), class: "rounded-lg w-full object-cover border border-gray-200 dark:border-gray-800 max-h-[500px] mb-4" %>
+  <% end %>
+  
+  <!-- 🏷️ Tagged Products -->
+  <% if @post.product_tags.any? %>
+    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+      🏷️ <span class="font-semibold">Tagged Products:</span>
+      <% @post.product_tags.each do |tag| %>
+        <%= link_to tag.name, product_tag_path(tag), class: "underline hover:text-red-500" %><% unless tag == @post.product_tags.last %>, <% end %>
+      <% end %>
+    </div>
   <% end %>
 
   <!-- ❤️ Like/Unlike Toggle -->
@@ -53,7 +102,6 @@
       </div>
     <% end %>
   <% end %>
-
 
   <!-- ✏️ Edit / 🗑️ Delete Buttons -->
   <% if user_signed_in? && current_user == @post.user %>

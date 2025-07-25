@@ -1,0 +1,17 @@
+<%= turbo_frame_tag "bookmark_post_#{post.id}" do %>
+  <% if current_user.bookmarked_posts.include?(post) %>
+    <%= button_to post_bookmark_path(post),
+        method: :delete,
+        data: { turbo_stream: true },
+        class: "text-red-600" do %>
+      🔖
+    <% end %>
+  <% else %>
+    <%= button_to post_bookmark_path(post),
+        method: :post,
+        data: { turbo_stream: true },
+        class: "text-gray-400 hover:text-red-500" do %>
+      📌
+    <% end %>
+  <% end %>
+<% end %>

@@ -11,12 +11,25 @@ class CommentsController < ApplicationController
 
       # ✅ Notification for comment on post
       unless @comment.user == @post.user
-        Notification.create!(
-          actor: current_user,
-          recipient: @post.user,
-          action: "commented on your post",
-          notifiable: @comment
-        )
+        if @comment.parent_id.present?
+          parent_comment = Comment.find_by(id: @comment.parent_id)
+
+          if parent_comment && parent_comment.user != current_user
+            Notification.create!(
+              actor: current_user,
+              recipient: parent_comment.user,
+              action: "replied",
+              notifiable: @comment
+            )
+          end
+        elsif @post.user != current_user
+          Notification.create!(
+            actor: current_user,
+            recipient: @post.user,
+            action: "commented",
+            notifiable: @comment
+          )
+        end
       end
 
       respond_to do |format|
@@ -69,3 +82,4 @@ class CommentsController < ApplicationController
     params.require(:comment).permit(:body, :parent_id)
   end
 end
+  

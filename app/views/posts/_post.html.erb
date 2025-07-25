@@ -1,77 +1,139 @@
 <%= turbo_frame_tag dom_id(post) do %>
-  <div class="w-full max-w-xl mx-auto bg-white dark:bg-gray-900 shadow-md rounded-xl p-6 transition-shadow hover:shadow-lg">
-  
-    <!-- 🧑‍🎤 Avatar + Username + Rating -->
+  <div class="w-full max-w-3xl mx-auto bg-white dark:bg-gray-900 shadow-md rounded-xl p-8 transition-shadow hover:shadow-lg">
+
+    <!-- 🧑‍🎤 Avatar + Username + Bookmark + Rating -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-3">
         <%= link_to user_path(username: post.user.username), data: { turbo: false }, class: "block" do %>
           <% if post.user.avatar.attached? %>
             <%= image_tag post.user.avatar.variant(resize_to_fill: [40, 40]),
-                  class: "w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700" %>
+              class: "w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700" %>
           <% else %>
             <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">👤</div>
           <% end %>
         <% end %>
 
         <%= link_to post.user.username,
-              user_path(username: post.user.username),
-              data: { turbo: false },
-              class: "font-semibold text-gray-800 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors" %>
+            user_path(username: post.user.username),
+            data: { turbo: false },
+            class: "font-semibold text-gray-800 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors" %>
       </div>
-      <span class="text-sm text-gray-500 dark:text-gray-400">⭐ <%= post.rating %>/5</span>
+
+      <!-- 📌 Bookmark + ⭐ Rating -->
+      <div class="flex items-center gap-2">
+        <% if Current.user.present? %>
+          <%= turbo_frame_tag "bookmark_post_#{post.id}" do %>
+            <% if Current.user.bookmarked_posts.include?(post) %>
+              <%= button_to post_bookmark_path(post), method: :delete, data: { turbo_stream: true }, class: "text-red-600" do %>
+                🔖
+              <% end %>
+            <% else %>
+              <%= button_to post_bookmark_path(post), method: :post, data: { turbo_stream: true }, class: "text-gray-400 hover:text-red-500" do %>
+                📌
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <% if post.rating.present? %>
+          <span class="text-sm text-gray-500 dark:text-gray-400">⭐ <%= post.rating %>/5</span>
+        <% end %>
+      </div>
     </div>
 
-    <!-- 📝 Post Caption -->
-    <p class="text-base text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
-      <%= parse_mentions_to_links(post.caption) %>
-    </p>
+    <!-- 🧼 Caption and Quoted Repost Preview -->
+    <% if post.repost? %>
+      <% if post.caption.present? %>
+        <!-- ✍️ User's own caption -->
+        <p class="text-base text-gray-900 dark:text-gray-100 leading-relaxed mb-2">
+          <%= parse_mentions_to_links(post.caption) %>
+        </p>
+      <% end %>
 
-    <!-- 📸 Post Image -->
+      <!-- 🔁 Quoted Repost Block -->
+      <div class="border-l-4 border-red-500 bg-gray-50 dark:bg-gray-800 text-sm px-4 py-3 rounded mb-4">
+        <p class="italic text-gray-700 dark:text-gray-300">
+          <%= parse_mentions_to_links(post.original_post.caption) %>
+        </p>
+        <% if post.original_post.image.attached? %>
+          <div class="mt-2">
+            <%= image_tag post.original_post.image.variant(resize_to_limit: [500, 300]),
+                class: "rounded-lg border border-gray-300 dark:border-gray-700 w-full max-w-sm object-cover" %>
+          </div>
+        <% end %>
+        <div class="text-xs text-gray-500 mt-1">
+          Quoted from <%= link_to "@#{post.original_post.user.username}", user_path(username: post.original_post.user.username), class: "hover:underline" %> ·
+          <%= time_ago_in_words(post.original_post.created_at) %> ago ·
+          <%= link_to "View Post", post_path(post.original_post), class: "hover:underline" %>
+        </div>
+      </div>
+    <% else %>
+      <!-- 🧼 Regular Post -->
+      <p class="text-base text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
+        <%= parse_mentions_to_links(post.caption) %>
+      </p>
+    <% end %>
+
+
+
+    <!-- 📸 Image -->
     <% if post.image.attached? %>
       <div class="mb-4">
         <%= link_to post_path(post), data: { turbo: false } do %>
-          <%= image_tag post.image.variant(resize_to_limit: [600, 400]), class: "rounded-lg w-full object-cover border border-gray-200 dark:border-gray-700" %>
+          <%= image_tag post.image.variant(resize_to_limit: [600, 400]),
+            class: "rounded-lg w-full object-cover border border-gray-200 dark:border-gray-700" %>
         <% end %>
       </div>
     <% else %>
-      <%= link_to "View Post", post_path(post), data: { turbo: false }, class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition-colors" %>
+      <%= link_to "View Post", post_path(post), data: { turbo: false },
+        class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition-colors" %>
     <% end %>
 
-    <!-- ✏️ Edit/Delete (if owner) -->
-    <% if post.user == current_user %>
+    <!-- ✏️ Edit / 🗑️ Delete -->
+    <% if Current.user && post.user == Current.user %>
       <div class="mt-4 flex gap-4 text-sm">
-        <%= link_to "Edit", edit_post_path(post), class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" %>
+        <%= link_to "Edit", edit_post_path(post),
+          class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" %>
         <%= button_to "Delete", post_path(post), method: :delete,
-            data: { confirm: "Are you sure?" },
-            class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors bg-transparent border-none" %>
+          data: { confirm: "Are you sure?" },
+          class: "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors bg-transparent border-none" %>
       </div>
     <% end %>
 
-    <!-- ❤️ Like Button (modular version) -->
-    <% if user_signed_in? %>
+    <!-- ❤️ Like + 🔁 Repost + 📝 Quote Repost -->
+    <% if Current.user.present? %>
       <%= turbo_frame_tag "like_post_#{post.id}" do %>
         <%= render partial: "posts/like", locals: { post: post } %>
       <% end %>
+
+      <%= turbo_frame_tag dom_id(post, :repost) do %>
+        <%= render partial: "posts/repost_button", locals: { post: post } %>
+      <% end %>
+
+      <%= link_to "📝 Quote Repost", new_post_path(repost_id: post.id),
+        class: "inline-block mt-2 text-sm text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors",
+        data: { turbo: false } %>
     <% end %>
 
-    <!-- 💬 Comments Preview + Show More Button -->
+    <!-- 💬 Comments Preview -->
     <% latest_comments = post.comments.where(parent_id: nil).order(created_at: :asc).limit(2) %>
     <%= turbo_frame_tag "comments_post_#{post.id}" do %>
       <%= render partial: "comments/comment", collection: latest_comments, as: :comment %>
       <% if post.comments.where(parent_id: nil).count > 2 %>
         <%= button_to "Show more comments",
-            more_comments_post_path(post),
-            method: :get,
-            data: { turbo_frame: "comments_post_#{post.id}" },
-            class: "text-sm text-blue-400 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors mt-2" %>
+          more_comments_post_path(post),
+          method: :get,
+          data: { turbo_frame: "comments_post_#{post.id}" },
+          class: "text-sm text-blue-400 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors mt-2" %>
       <% end %>
     <% end %>
 
     <!-- ➕ Comment Form -->
-    <% if user_signed_in? %>
+    <% if Current.user.present? %>
       <div class="mt-4">
         <%= render partial: "comments/form", locals: { post: post, comment: post.comments.build } %>
       </div>
     <% end %>
+
   </div>
 <% end %>

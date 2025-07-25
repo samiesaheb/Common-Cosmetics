@@ -1,27 +1,36 @@
 <nav class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 shadow-sm font-sans">
-  <div class="w-full px-4 py-3 flex justify-between items-center">
-    <!-- 🌐 Brand -->
-    <div>
-      <%= link_to "Common Cosmetics", root_path, class: "text-xl font-bold text-red-600 dark:text-red-400 hover:underline tracking-tight" %>
-    </div>
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
 
-    <!-- 🔍 Search Bar -->
+    <!-- 🌐 Logo -->
+    <%= link_to "Common Cosmetics", root_path,
+        class: "text-xl font-bold text-red-600 dark:text-red-400 hover:underline tracking-tight" %>
+
+    <!-- 🔍 Search Bar (centered only if signed in) -->
     <% if user_signed_in? %>
-      <div class="flex-grow max-w-md w-full px-2">
+      <div class="flex-grow px-4 max-w-lg w-full">
         <%= render "shared/search_bar" %>
       </div>
     <% end %>
 
-    <!-- 🌐 Links -->
-    <div class="flex flex-wrap items-center space-x-4 gap-y-2">
+    <!-- 🔗 Right-side -->
+    <div class="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-200">
       <% if user_signed_in? %>
-        <%= link_to "Profile", user_path(current_user), class: "text-sm text-gray-800 dark:text-gray-100 hover:underline" %>
+
+        <!-- 💬 Conversations -->
+        <div class="relative">
+          <%= link_to conversations_path,
+              class: "hover:text-red-600 dark:hover:text-red-400 transition text-xl" do %>
+            💬
+            <% if current_user.conversations.any? { |c| c.unread_by?(current_user) } %>
+              <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-black"></span>
+            <% end %>
+          <% end %>
+        </div>
 
         <!-- 🔔 Notifications -->
         <%= turbo_stream_from "notifications_user_#{current_user.id}" %>
-
         <div x-data="{ open: false }" class="relative">
-          <button @click="open = !open" class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">
+          <button @click="open = !open" class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
             🔔
             <%= render partial: "notifications/count", locals: { count: current_user.notifications.unread.count } %>
           </button>
@@ -29,49 +38,56 @@
             x-show="open"
             @click.outside="open = false"
             x-cloak
-            class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40"
+            class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-40"
           >
             <%= render "notifications/list", notifications: current_user.notifications.grouped %>
-
-            <div class="text-center py-2 border-t dark:border-gray-700">
+            <div class="border-t dark:border-gray-700 py-2 text-center">
               <%= button_to "Mark all as read", mark_all_as_read_notifications_path,
                 method: :post,
                 data: { turbo_stream: true },
-                class: "text-sm text-blue-600 hover:underline w-full text-left px-4 py-2" %>
-            </div>
-            <div class="text-center py-2 border-t dark:border-gray-700">
-              <%= link_to "View All", notifications_path, class: "text-sm text-blue-600 hover:underline" %>
+                class: "text-sm text-blue-600 hover:underline w-full px-4 py-2 text-left" %>
+              <%= link_to "View All", notifications_path,
+                class: "block text-sm text-blue-600 hover:underline mt-1" %>
             </div>
           </div>
         </div>
 
-
         <!-- 👤 Avatar -->
-        <div x-data="{ open: false }" class="relative">
-          <button @click="open = !open" class="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-700 focus:outline-none">
+        <div>
+          <%= link_to user_path(current_user), class: "block rounded-full border-2 border-red-500 hover:opacity-90 transition" do %>
             <% if current_user.avatar.attached? %>
-              <%= image_tag current_user.avatar.variant(resize_to_fill: [48, 48]), class: "w-12 h-12 object-cover" %>
+              <%= image_tag current_user.avatar.variant(resize_to_fill: [80, 80]),
+                  class: "w-10 h-10 rounded-full object-cover" %>
             <% else %>
-              <div class="w-12 h-12 bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-lg text-gray-600 dark:text-gray-300">👤</div>
+              <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-lg text-white">👤</div>
             <% end %>
+          <% end %>
+        </div>
+
+        <!-- ☰ Dropdown -->
+        <div x-data="{ openMenu: false }" class="relative">
+          <button @click="openMenu = !openMenu" class="text-xl focus:outline-none hover:text-red-500 transition">
+            ☰
           </button>
           <div
-            x-show="open"
-            @click.outside="open = false"
+            x-show="openMenu"
+            @click.outside="openMenu = false"
             x-cloak
             class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-40"
           >
             <%= link_to "Edit Profile", edit_user_registration_path,
-              class: "block px-4 py-2 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" %>
+              class: "block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700" %>
             <%= link_to "Logout", destroy_user_session_path,
               method: :delete,
               data: { turbo_method: :delete },
               class: "block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700" %>
           </div>
         </div>
+
       <% else %>
-        <%= link_to "Login", new_user_session_path, class: "text-sm text-gray-800 dark:text-gray-100 hover:underline" %>
-        <%= link_to "Sign Up", new_user_registration_path, class: "text-sm text-red-600 font-semibold hover:underline" %>
+        <%= link_to "Login", new_user_session_path, class: "hover:underline" %>
+        <%= link_to "Sign Up", new_user_registration_path,
+              class: "bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition" %>
       <% end %>
     </div>
   </div>

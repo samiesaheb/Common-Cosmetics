@@ -1,0 +1,19 @@
+<% if Current.user.present? %>
+  <%= turbo_frame_tag dom_id(post, :repost) do %>
+    <% if Current.user.reposted_posts.include?(post) %>
+      <%= button_to post_repost_path(post),
+          method: :delete,
+          data: { turbo_stream: true },
+          class: "text-red-600 hover:text-red-800 transition-colors" do %>
+        🔁 Reposted
+      <% end %>
+    <% else %>
+      <%= button_to post_repost_path(post),
+          method: :post,
+          data: { turbo_stream: true },
+          class: "text-gray-400 hover:text-red-500 transition-colors" do %>
+        🔁 Repost
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

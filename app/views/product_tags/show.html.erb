@@ -1,0 +1,9 @@
+<div class="max-w-3xl mx-auto mt-24 px-4">
+  <h1 class="text-2xl font-bold mb-6 text-primary">🏷️ <%= @product_tag.name %></h1>
+
+  <% if @posts.any? %>
+    <%= render partial: "posts/post", collection: @posts, as: :post %>
+  <% else %>
+    <p class="text-gray-500 dark:text-gray-400">No posts found with this product tag.</p>
+  <% end %>
+</div>

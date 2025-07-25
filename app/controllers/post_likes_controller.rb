@@ -5,14 +5,16 @@ class PostLikesController < ApplicationController
   def create
     @like = @post.likes.find_or_create_by(user: current_user)
 
-    # ✅ Notification for post like
-    unless Notification.exists?(actor: current_user, notifiable: @like, recipient: @post.user)
-      Notification.create!(
-        actor: current_user,
-        recipient: @post.user,
-        action: "liked your post",
-        notifiable: @like
-      )
+    # ✅ Notify only if user is not liking their own post
+    if @post.user != current_user && @like.persisted?
+      unless Notification.exists?(actor: current_user, notifiable: @post, recipient: @post.user, action: "liked")
+        Notification.create!(
+          actor: current_user,
+          recipient: @post.user,
+          notifiable: @post,
+          action: "liked"
+        )
+      end
     end
 
     respond_to do |format|

@@ -14,30 +14,45 @@ class Notification < ApplicationRecord
   def message
     return "Someone interacted with your content." unless actor && notifiable
 
-    content_type = case notifiable
-                   when Post
-                     "post"
-                   when Comment
-                     notifiable.parent_id.present? ? "reply" : "comment"
-                   else
-                     notifiable_type.downcase
-                   end
-
     case action
     when "liked"
-      "❤️ #{actor.username} liked your #{content_type}."
+      if notifiable.is_a?(Post)
+        "❤️ #{actor.username} liked your post."
+      elsif notifiable.is_a?(Comment)
+        type = notifiable.parent_id.present? ? "reply" : "comment"
+        "❤️ #{actor.username} liked your #{type}."
+      else
+        type = notifiable_type&.downcase.presence || "content"
+        "❤️ #{actor.username} liked your #{type}."
+      end
+
     when "commented"
-      "💬 #{actor.username} commented on your post."
+      if notifiable.is_a?(Comment)
+        if notifiable.parent_id.present?
+          "💬 #{actor.username} replied to your comment."
+        else
+          "💬 #{actor.username} commented on your post."
+        end
+      else
+        "💬 #{actor.username} commented on your post."
+      end
+
     when "replied"
       "↩️ #{actor.username} replied to your comment."
+
     when "mentioned"
-      "📢 #{actor.username} mentioned you in a #{content_type}."
+      context = notifiable.is_a?(Post) ? "post" : "comment"
+      "📢 #{actor.username} mentioned you in a #{context}."
+
     when "followed"
       "➕ #{actor.username} followed you."
+
     else
-      "#{actor.username} #{action} your #{content_type}."
+      type = notifiable_type&.downcase.presence || "content"
+      "🔔 #{actor.username} #{action} your #{type}."
     end
   end
+
 
   def self.grouped(limit: 10)
     select("MIN(id) AS id, action, notifiable_type, notifiable_id, COUNT(*) AS count, MAX(created_at) AS created_at")

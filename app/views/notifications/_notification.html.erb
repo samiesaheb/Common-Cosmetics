@@ -1,20 +1,33 @@
-<% if notification.notifiable&.respond_to?(:post) && notification.notifiable.post.present? %>
-  <%= turbo_frame_tag dom_id(notification) do %>
-    <%= link_to mark_as_read_notification_path(notification),
-                data: { turbo_frame: "_top" },
-                class: "block" do %>
-      <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 <%= 'opacity-50' if notification.read_at %>">
-        <p class="text-sm text-gray-900 dark:text-white">
-          <strong>
-            <% if notification.actor.present? %>
-              <%= link_to notification.actor.username, user_path(notification.actor), class: "hover:underline text-primary" %>
-            <% else %>
-              [deleted user]
-            <% end %>
+<% notifiable = notification.notifiable %>
+
+<% if notifiable.present? %>
+  <% path =
+    case notifiable
+    when Post
+      post_path(notifiable)
+    when Comment
+      post_path(notifiable.post, anchor: dom_id(notifiable))
+    else
+      "#" # fallback
+    end
+  %>
+
+  <%= link_to path, class: "block", data: { turbo_frame: "_top" } do %>
+    <div id="<%= dom_id(notification) %>" class="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 <%= 'opacity-50' if notification.read_at %>">
+      <p class="text-sm text-gray-900 dark:text-white">
+        <% if notification.actor.present? %>
+          <strong class="text-primary hover:underline">
+            <%= notification.actor.username %>
           </strong>
-          <%= notification_message(notification) %>
-        </p>
-      </div>
-    <% end %>
+        <% else %>
+          <strong class="text-gray-500 dark:text-gray-400">[deleted user]</strong>
+        <% end %>
+        <%= notification.message %>
+      </p>
+    </div>
   <% end %>
+<% else %>
+  <div class="p-3 text-sm text-gray-500 italic dark:text-gray-400">
+    [This notification refers to deleted content]
+  </div>
 <% end %>

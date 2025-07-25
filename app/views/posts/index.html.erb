@@ -1,39 +1,60 @@
-<div class="flex justify-center px-4 sm:px-6 lg:px-8">
-  <div class="w-full max-w-2xl space-y-8">
-    
-    <!-- 🧵 New Post Form -->
-    <div class="mb-10">
-      <%= turbo_frame_tag "new_post_form" do %>
-        <%= render partial: "form", locals: { post: Post.new } %>
-      <% end %>
-    </div>
-    <!-- 🧴 Posts List -->
-    <%= turbo_frame_tag "posts_list" do %>
-      <% if @posts.any? %>
-        <div class="space-y-8">
-          <%= render partial: "posts/post", collection: @posts, as: :post %>
-        </div>
+<%= turbo_frame_tag "posts_tab_frame" do %>
+  <div class="flex justify-center px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-2xl space-y-8">
+      
+      <!-- ✅ Turbo Stream Sub for Live Updates -->
+      <%= turbo_stream_from "posts" %>
 
-        <% if @posts.next_page %>
-          <div class="text-center mt-8">
-            <%= link_to "Load More", more_posts_path(page: @posts.next_page),
-              data: { turbo_frame: "posts_list" },
-              class: "inline-block bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-all duration-200 shadow-md" %>
+      <!-- 💡 Feed Tabs (Centered Above Form) -->
+      <div class="text-center">
+        <div class="inline-flex space-x-4 mb-4 border-b border-gray-300 dark:border-gray-700">
+          <%= link_to "🧭 Discover", posts_path(tab: "discover"), data: { turbo_frame: "posts_tab_frame" }, class: "pb-2 px-4 transition-all duration-200 font-semibold #{params[:tab] != 'following' ? 'border-b-2 border-red-500 text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-300 hover:text-red-500'}" %>
+          <%= link_to "👥 Following", posts_path(tab: "following"), data: { turbo_frame: "posts_tab_frame" }, class: "pb-2 px-4 transition-all duration-200 font-semibold #{params[:tab] == 'following' ? 'border-b-2 border-red-500 text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-300 hover:text-red-500'}" %>
+        </div>
+      </div>
+
+      <!-- 👤 Suggested Users (Discover only) -->
+      <% if @tab == "discover" && @suggested_users.present? %>
+        <%= render partial: "users/suggested_users", locals: { suggested_users: @suggested_users } %>
+      <% end %>
+
+      <!-- 🧵 New Post Form -->
+      <div class="mb-10">
+        <%= turbo_frame_tag "new_post_form" do %>
+          <%= render partial: "form", locals: { post: Post.new } %>
+        <% end %>
+      </div>
+
+      <!-- ✅ Posts Feed (Live updates target here) -->
+      <div id="posts" class="space-y-8">
+        <% if @posts.any? %>
+          <% @posts.each do |post| %>
+            <%= turbo_frame_tag dom_id(post) do %>
+              <%= render partial: "posts/post", locals: { post: post } %>
+            <% end %>
+          <% end %>
+
+          <% if @posts.next_page %>
+            <div class="text-center mt-8">
+              <%= link_to "Load More", more_posts_path(page: @posts.next_page, tab: params[:tab]),
+                data: { turbo_frame: "posts_list" },
+                class: "inline-block bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-all duration-200 shadow-md" %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="text-center py-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg animate-fade-in">
+            <p class="text-gray-600 dark:text-gray-300 text-lg font-medium">
+              No posts yet. Be the first to share!
+            </p>
+            <%= link_to "Create a post", "#new_post_form",
+              class: "mt-4 inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors duration-200 shadow-md" %>
           </div>
         <% end %>
-      <% else %>
-        <div class="text-center py-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg animate-fade-in">
-          <p class="text-gray-600 dark:text-gray-300 text-lg font-medium">
-            No posts yet. Be the first to share!
-          </p>
-          <%= link_to "Create a post", "#new_post_form",
-            class: "mt-4 inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors duration-200 shadow-md" %>
-        </div>
-      <% end %>
-    <% end %>
+      </div>
 
+    </div>
   </div>
-</div>
+<% end %>
 
 <style>
   @keyframes fade-in {

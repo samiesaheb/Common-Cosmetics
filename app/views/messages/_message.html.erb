@@ -1,0 +1,46 @@
+<div id="message_<%= message.id %>" class="py-2 relative group">
+  <div class="flex gap-3 items-start <%= 'justify-end' if message.sent_by?(current_user) %>">
+    <!-- Avatar -->
+    <% if message.user.avatar.attached? %>
+      <%= image_tag message.user.avatar.variant(resize_to_fill: [32, 32]),
+          class: "w-8 h-8 rounded-full border border-gray-300 dark:border-gray-700 object-cover" %>
+    <% else %>
+      <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-sm text-white">👤</div>
+    <% end %>
+
+    <!-- Message bubble -->
+    <div class="max-w-sm px-4 py-2 rounded-xl shadow text-sm
+                <%= message.sent_by?(current_user) ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100' %>">
+      
+      <!-- Username -->
+      <div class="mb-1 text-xs font-semibold">
+        <%= link_to "@#{message.user.username}", user_path(message.user),
+            class: "hover:underline text-xs text-gray-100 dark:text-gray-300" %>
+      </div>
+
+      <!-- Content -->
+      <div><%= message.content %></div>
+
+      <!-- Timestamp -->
+      <div class="text-[10px] text-gray-200 dark:text-gray-400 mt-1">
+        <%= message.created_at.strftime("%H:%M %p") %>
+      </div>
+
+      <!-- Seen indicator -->
+      <% if message.sent_by?(current_user) && message == message.conversation.messages.where(user: current_user).last && message.read %>
+        <div class="text-[10px] text-green-400 mt-1">✅ Seen</div>
+      <% end %>
+
+      <!-- Delete button (bottom right) -->
+      <% if message.sent_by?(current_user) %>
+        <div class="text-[10px] mt-1 text-right">
+          <%= button_to "Delete",
+              conversation_message_path(message.conversation, message),
+              method: :delete,
+              form: { data: { turbo_confirm: "Delete this message?" } },
+              class: "text-white text-[10px] underline hover:text-gray-200 bg-transparent p-0" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

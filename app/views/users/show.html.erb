@@ -12,14 +12,20 @@
         <h1 class="text-xl font-bold text-gray-900 dark:text-white"><%= @user.username %></h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Joined <%= @user.created_at.strftime("%B %Y") %></p>
 
-        <!-- ✅ Follower/Following Count -->
+        <!-- 💬 Message button -->
+        <% if user_signed_in? && current_user != @user %>
+          <%= button_to "💬 Message", conversations_path(receiver_id: @user.id),
+                method: :post,
+                data: { turbo: false },
+                class: "mt-2 inline-block px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition" %>
+        <% end %>
+
         <%= turbo_frame_tag "follower_counts" do %>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             <%= pluralize(@user.following.count, "Following") %> · <%= pluralize(@user.followers.count, "Follower") %>
           </p>
         <% end %>
 
-        <!-- ✅ Follow/Unfollow Button -->
         <%= turbo_frame_tag "follow_button" do %>
           <% if user_signed_in? && current_user != @user %>
             <% if current_user.following.include?(@user) %>
@@ -44,14 +50,26 @@
 
     <hr class="my-6 border-gray-200 dark:border-gray-700" />
 
-    <!-- 🧴 Posts -->
-    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Posts</h2>
+    <!-- 🗂️ Tabs for Posts/Bookmarks -->
+    <div class="flex gap-4 mb-6 text-sm font-medium">
+      <%= link_to "Posts", user_path(username: @user.username), 
+          class: "px-4 py-2 rounded #{params[:tab] != 'bookmarks' ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'}" %>
+      <%= link_to "Bookmarks", user_path(username: @user.username, tab: "bookmarks"),
+          class: "px-4 py-2 rounded #{params[:tab] == 'bookmarks' ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'}" %>
+    </div>
+
     <% if @posts.any? %>
       <div id="posts_list" class="space-y-6">
         <%= render partial: "posts/post", collection: @posts, as: :post %>
       </div>
     <% else %>
-      <p class="text-gray-500 dark:text-gray-400">This user hasn't posted yet.</p>
+      <p class="text-gray-500 dark:text-gray-400">
+        <% if params[:tab] == "bookmarks" %>
+          This user hasn't bookmarked any posts.
+        <% else %>
+          This user hasn't posted yet.
+        <% end %>
+      </p>
     <% end %>
   </div>
 <% end %>

@@ -72,4 +72,22 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
   config.active_storage.variant_processor = :mini_magick
 
+  config.action_cable.url = "ws://localhost:3000/cable"
+  config.action_cable.allowed_request_origins = [ "http://localhost:3000" ]
+
+  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+
+  config.action_mailer.smtp_settings = {
+    address:              "smtp.gmail.com",
+    port:                 587,
+    domain:               "gmail.com",
+    user_name:            ENV["GMAIL_USERNAME"],       # your Gmail address
+    password:             ENV["GMAIL_APP_PASSWORD"],   # 16-char app password
+    authentication:       "plain",
+    enable_starttls_auto: true
+  }
+
 end

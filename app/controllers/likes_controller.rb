@@ -3,7 +3,20 @@ class LikesController < ApplicationController
   before_action :set_post
 
   def create
-    @post.likes.find_or_create_by(user: current_user)
+    like = @post.likes.find_or_create_by(user: current_user)
+
+    Rails.logger.debug "🏷️ post.user.id: #{@post.user.id}, current_user.id: #{current_user.id}"
+    Rails.logger.debug "🏷️ like.persisted?: #{like.persisted?}"
+
+    # ✅ Only notify if liking someone else's post
+    if like.persisted? && @post.user.present? && @post.user != current_user
+      Notification.create!(
+        recipient: @post.user,     # ✅ not `user:`
+        actor: current_user,
+        notifiable: @post,
+        action: "liked"
+      )
+    end
 
     respond_to do |format|
       format.turbo_stream do

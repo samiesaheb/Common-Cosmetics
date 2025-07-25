@@ -1,0 +1,16 @@
+<div class="w-full flex justify-center mt-6">
+  <div class="w-full max-w-xl" data-controller="typing" data-typing-conversation-id-value="<%= conversation.id %>">
+    <%= form_with model: [conversation, message],
+                  data: { turbo_frame: "message_form" },
+                  class: "flex gap-2 w-full" do |f| %>
+
+      <%= f.text_area :content,
+        class: "flex-grow w-full px-4 py-2 border rounded resize-y min-h-[40px] max-h-60 dark:bg-gray-900 dark:border-gray-700",
+        placeholder: "Type your message...",
+        data: { action: "input->typing#typing" } %>
+
+      <%= f.submit "Send",
+        class: "px-6 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition self-end" %>
+    <% end %>
+  </div>
+</div>

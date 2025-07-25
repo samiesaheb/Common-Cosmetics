@@ -29,10 +29,8 @@
     <%= render "shared/navbar" %>
 
     <main class="max-w-2xl mx-auto mt-28 px-4">
-      <% flash.each do |key, value| %>
-        <div class="bg-red-100 text-red-800 px-4 py-2 mb-4 rounded w-full">
-          <%= value %>
-        </div>
+      <%= turbo_frame_tag "flash" do %>
+        <%= render "layouts/flash", notice: flash[:notice], alert: flash[:alert] %>
       <% end %>
 
       <%= turbo_stream_from "notifications_user_#{current_user.id}" if current_user %>

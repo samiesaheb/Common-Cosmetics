@@ -1,0 +1,35 @@
+<h1 class="text-xl font-bold mb-6">💬 Conversations</h1>
+
+<% if @conversations.any? %>
+  <ul class="space-y-3">
+    <% @conversations.each do |conversation| %>
+      <% other_user = conversation.sender == current_user ? conversation.receiver : conversation.sender %>
+      <% last_message = conversation.messages.last %>
+
+      <li>
+        <%= link_to conversation_path(conversation),
+              class: "block px-4 py-3 rounded-lg bg-white dark:bg-gray-900 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition" do %>
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white">@<%= other_user.username %></p>
+              <% if last_message %>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate max-w-xs">
+                  <%= last_message.content %>
+                </p>
+              <% else %>
+                <p class="text-sm text-gray-500 italic mt-1">No messages yet</p>
+              <% end %>
+            </div>
+            <% if last_message %>
+              <span class="text-xs text-gray-400 whitespace-nowrap ml-4">
+                <%= time_ago_in_words(last_message.created_at) %> ago
+              </span>
+            <% end %>
+          </div>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-gray-500 dark:text-gray-400">You have no conversations yet.</p>
+<% end %>

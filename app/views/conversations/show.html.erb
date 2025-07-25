@@ -1,0 +1,53 @@
+<div class="max-w-xl mx-auto mt-8 bg-white dark:bg-gray-900 rounded-xl shadow p-6 space-y-6 text-center">
+
+  <!-- 👤 Other User Info -->
+  <% other_user = @conversation.sender == current_user ? @conversation.receiver : @conversation.sender %>
+
+  <div class="flex flex-col items-center space-y-1 mb-6">
+    <% if other_user.avatar.attached? %>
+      <%= image_tag other_user.avatar.variant(resize_to_fill: [64, 64]),
+          class: "w-16 h-16 rounded-full object-cover border border-gray-300 dark:border-gray-700" %>
+    <% else %>
+      <div class="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-2xl text-white">👤</div>
+    <% end %>
+
+    <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">@<%= other_user.username %></h2>
+
+    <%= link_to "View Profile", user_path(other_user),
+        class: "text-sm text-blue-600 dark:text-blue-400 hover:underline" %>
+  </div>
+
+  <!-- 💬 Header -->
+  <h1 class="text-xl font-bold text-gray-900 dark:text-white">💬 Conversation with <%= other_user.username %></h1>
+
+  <!-- 📨 Messages -->
+  <%= turbo_stream_from @conversation %>
+
+  <%= turbo_frame_tag "messages" do %>
+    <div id="messages"
+        data-controller="autoscroll"
+        data-autoscroll-target="container"
+        class="space-y-4 text-left max-h-[60vh] overflow-y-auto pr-2">
+      <%= render @messages %>
+    </div>
+  <% end %>
+
+  <!-- 💬 Typing Indicator -->
+  <div id="typing_status">
+    <%= render "conversations/typing", conversation: @conversation %>
+  </div>
+
+  <!-- ✏️ Message Form -->
+  <%= turbo_frame_tag "message_form" do %>
+    <%= render "messages/form", message: @message, conversation: @conversation %>
+  <% end %>
+</div>
+
+<script>
+  document.addEventListener("turbo:load", () => {
+    const messagesDiv = document.getElementById("messages");
+    if (messagesDiv) {
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  });
+</script>

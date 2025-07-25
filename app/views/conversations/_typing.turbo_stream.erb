@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "typing_status" do %>
+  <%= render partial: "conversations/typing", locals: { conversation: conversation } %>
+<% end %>
