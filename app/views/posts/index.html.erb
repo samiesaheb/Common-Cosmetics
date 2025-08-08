@@ -1,0 +1,21 @@
+<div class="max-w-2xl mx-auto mt-10 space-y-6">
+  <% if notice %>
+    <div class="bg-green-100 text-green-800 text-sm rounded px-4 py-2 mb-4">
+      <%= notice %>
+    </div>
+  <% end %>
+
+  <!-- Feed header -->
+  <div class="flex justify-between items-center">
+    <h2 class="text-2xl font-bold">Your Feed</h2>
+    <%= link_to "➕ New Post", new_post_path, class: "bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded text-sm" %>
+  </div>
+
+  <% if @posts.any? %>
+    <% @posts.each do |post| %>
+      <%= render partial: "posts/post", locals: { post: post } %>
+    <% end %>
+  <% else %>
+    <p class="text-gray-500 mt-6">No posts yet. Follow users or create your own!</p>
+  <% end %>
+</div>

@@ -1,0 +1,47 @@
+<div class="bg-white border border-gray-200 rounded-lg shadow-md p-5">
+  <!-- User Info -->
+  <div class="flex items-center space-x-3 mb-4">
+    <% if post.user.avatar.attached? %>
+      <%= image_tag post.user.avatar.variant(resize_to_fill: [40, 40]), class: "rounded-full w-10 h-10 object-cover" %>
+    <% else %>
+      <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white text-lg font-semibold">
+        <%= post.user.username[0].upcase %>
+      </div>
+    <% end %>
+    <div>
+      <%= link_to "@#{post.user.username}", username_profile_path(username: post.user.username), class: "font-semibold hover:underline" %>
+      <p class="text-xs text-gray-500">Posted <%= time_ago_in_words(post.created_at) %> ago</p>
+    </div>
+  </div>
+
+  <!-- Post Content -->
+  <div class="mb-4 whitespace-pre-line text-gray-800">
+    <%= simple_format(post.content) %>
+  </div>
+
+  <!-- Post Image -->
+  <% if post.image.attached? %>
+    <div class="mb-4">
+      <%= image_tag post.image.variant(resize_to_limit: [600, 400]), class: "rounded-md shadow" %>
+    </div>
+  <% end %>
+
+  <!-- Star Rating -->
+  <% if post.rating.present? %>
+    <div class="flex items-center mb-2">
+      <% 1.upto(5) do |i| %>
+        <% if i <= post.rating %>
+          <span class="text-yellow-500 text-lg">★</span>
+        <% else %>
+          <span class="text-gray-300 text-lg">★</span>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+  <!-- Like Button -->
+  <div class="mt-3">
+    <%= turbo_frame_tag dom_id(post, :like_button) do %>
+      <%= render "likes/like_button", likeable: post %>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="max-w-2xl mx-auto mt-12 p-6 bg-white rounded-lg shadow-md">
+  <div class="flex flex-col items-center">
+    <% if @user.avatar.attached? %>
+      <%= image_tag @user.avatar.variant(resize_to_limit: [128, 128]), class: "rounded-full w-32 h-32 object-cover border shadow" %>
+    <% else %>
+      <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-4xl text-gray-500">
+        👤
+      </div>
+    <% end %>
+
+    <h2 class="text-xl font-semibold mt-2">
+      <%= @user.full_name %>
+    </h2>
+
+    <h2 class="text-2xl font-bold mt-2">@<%= @user.username %></h2>
+
+    <p class="text-gray-600 mt-2 text-center max-w-md"><%= @user.bio.presence || "No bio yet." %></p>
+
+    <p class="text-sm text-gray-500 mt-2">Joined <%= @user.created_at.strftime("%B %Y") %></p>
+
+    <div class="flex space-x-6 mt-4">
+      <div class="text-center">
+        <p class="text-lg font-bold"><%= @user.followers.count %></p>
+        <p class="text-gray-600 text-sm">Followers</p>
+      </div>
+      <div class="text-center">
+        <p class="text-lg font-bold"><%= @user.following.count %></p>
+        <p class="text-gray-600 text-sm">Following</p>
+      </div>
+    </div>
+
+    <% if user_signed_in? && current_user != @user %>
+      <div class="mt-4">
+        <% if @is_following %>
+          <%= button_to "Unfollow", follow_path(followed_id: @user.id), method: :delete, class: "bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200" %>
+        <% else %>
+          <%= button_to "Follow", follows_path(followed_id: @user.id), method: :post, class: "bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- User's Posts -->
+  <div class="mt-10 w-full">
+    <h3 class="text-xl font-bold mb-4">
+      Posts <span class="text-sm font-normal text-gray-500">(<%= @user.posts.count %>)</span>
+    </h3>
+
+    <% if @user.posts.any? %>
+      <% @user.posts.order(created_at: :desc).each do |post| %>
+        <%= render partial: "posts/post", locals: { post: post } %>
+      <% end %>
+    <% else %>
+      <p class="text-gray-500 text-center mt-6">This user hasn’t posted anything yet.</p>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+<!-- Sidebar -->
+<aside class="w-64 min-h-screen bg-white text-black fixed left-0 top-0 flex flex-col shadow-lg border-r border-gray-200">
+  <!-- Logo -->
+  <div class="p-6 text-2xl font-extrabold border-b border-gray-200 text-red-600">
+    <%= link_to "Common Cosmetics", root_path, class: "hover:underline" %>
+  </div>
+
+  <!-- Nav Links -->
+  <nav class="flex-1 p-4 space-y-3 text-base font-medium">
+    <% if user_signed_in? %>
+      <!-- Avatar thumbnail link to public profile -->
+      <%= link_to username_profile_path(username: current_user.username), class: "flex items-center space-x-3 hover:bg-gray-100 px-3 py-2 rounded" do %>
+        <% if current_user.avatar.attached? %>
+          <%= image_tag current_user.avatar.variant(resize_to_fill: [40, 40]), class: "rounded-full w-10 h-10 object-cover border" %>
+        <% else %>
+          <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-lg text-white font-semibold">
+            <%= current_user.username[0].upcase %>
+          </div>
+        <% end %>
+        <span class="font-medium"><%= current_user.username %></span>
+      <% end %>
+
+      <%= link_to "Edit Profile", edit_user_registration_path, class: "block px-3 py-2 rounded hover:bg-gray-100" %>
+      <%= link_to "Sign Out", destroy_user_session_path, method: :delete, data: { turbo: false }, class: "block px-3 py-2 rounded hover:bg-gray-100" %>
+    <% else %>
+      <%= link_to "Login", new_user_session_path, class: "block px-3 py-2 rounded hover:bg-gray-100" %>
+      <%= link_to "Sign Up", new_user_registration_path, class: "block px-3 py-2 rounded hover:bg-gray-100" %>
+    <% end %>
+  </nav>
+
+  <!-- Footer -->
+  <footer class="p-4 text-sm border-t border-gray-200 text-gray-500">
+    &copy; <%= Time.current.year %> Common Cosmetics
+  </footer>
+</aside>

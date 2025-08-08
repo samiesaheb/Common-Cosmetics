@@ -1,0 +1,10 @@
+<% liked = current_user.likes.exists?(likeable: likeable) %>
+
+<%= button_to(
+  liked ? '❤️ Unlike' : '🤍 Like',
+  liked ? unlike_likes_path(likeable_type: likeable.class.name, likeable_id: likeable.id) :
+          likes_path(likeable_type: likeable.class.name, likeable_id: likeable.id),
+  method: liked ? :delete : :post,
+  data: { turbo_stream: true },
+  class: "text-sm px-3 py-1 rounded #{liked ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}"
+) %>
