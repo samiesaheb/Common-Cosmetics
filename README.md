@@ -14,7 +14,7 @@
 
 ## 🚀 Tech Stack
 
-- **Ruby on Rails 7**
+- **Ruby on Rails 8**
 - **PostgreSQL**
 - **Devise** for authentication
 - **Turbo** for real-time features
