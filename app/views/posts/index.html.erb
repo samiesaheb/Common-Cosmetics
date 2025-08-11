@@ -1,20 +1,22 @@
-<div class="max-w-2xl mx-auto mt-10 space-y-6">
-  <% if notice %>
-    <div class="bg-green-100 text-green-800 text-sm rounded px-4 py-2 mb-4">
-      <%= notice %>
-    </div>
-  <% end %>
-
+<div class="max-w-2xl mx-auto mt-8 space-y-6">
   <!-- Feed header -->
-  <div class="flex justify-between items-center">
-    <h2 class="text-2xl font-bold">Your Feed</h2>
-    <%= link_to "➕ New Post", new_post_path, class: "bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded text-sm" %>
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-bold tracking-tight">Your Feed</h2>
+    <%= link_to new_post_path,
+      class: "inline-flex items-center gap-2 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-sm shadow-sm active:scale-[.98] transition" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>New Post</span>
+    <% end %>
   </div>
 
   <% if @posts.any? %>
-    <% @posts.each do |post| %>
-      <%= render partial: "posts/post", locals: { post: post } %>
-    <% end %>
+    <div class="space-y-5">
+      <% @posts.each do |post| %>
+        <%= render partial: "posts/post", locals: { post: post } %>
+      <% end %>
+    </div>
   <% else %>
     <p class="text-gray-500 mt-6">No posts yet. Follow users or create your own!</p>
   <% end %>

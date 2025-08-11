@@ -1,0 +1,60 @@
+<!-- Header -->
+<header class="sticky top-0 z-30 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-200">
+  <div class="mx-auto max-w-4xl px-4">
+    <div class="h-14 flex items-center justify-center">
+      <div class="relative w-full max-w-xl">
+
+        <% if user_signed_in? %>
+          <!-- force full-page search on Enter -->
+          <%= form_with url: (defined?(search_path) ? search_path : "/search"),
+                        method: :get,
+                        local: true,
+                        data: { turbo_frame: "search_suggestions" },
+                        html: { class: "w-full" } do |f| %>
+
+
+            <!-- Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z"/>
+            </svg>
+
+            <!-- Query -->
+            <%= f.search_field :q,
+                  value: params[:q],
+                  placeholder: "Search…",
+                  data: { controller: "typeahead",
+                          action: "input->typeahead#debouncedSubmit keydown->typeahead#keys blur->typeahead#maybeHide focus->typeahead#show" },
+                  class: "w-full pl-9 pr-3 h-10 rounded-xl border border-gray-300 bg-white text-sm
+                           focus:border-red-500 focus:ring-2 focus:ring-red-500/30 shadow-sm" %>
+
+            <button type="submit" class="sr-only">Search</button>
+          <% end %>
+
+          <!-- Suggestions dropdown -->
+          <turbo-frame id="search_suggestions" class="absolute left-0 right-0 mt-2 hidden"></turbo-frame>
+
+        <% else %>
+          <div class="w-full">
+            <!-- Looks identical but disabled -->
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z"/>
+            </svg>
+            <input type="search"
+                   value=""
+                   placeholder="Search…"
+                   class="w-full pl-9 pr-3 h-10 rounded-xl border border-gray-300 bg-white text-sm
+                          focus:border-red-500 focus:ring-2 focus:ring-red-500/30 shadow-sm"
+                   disabled>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+</header>

@@ -1,22 +1,93 @@
-<div id="<%= dom_id comment %>">
-  <p>
-    <strong>User:</strong>
-    <%= comment.user_id %>
-  </p>
+<div
+  id="<%= dom_id(comment) %>"
+  class="group flex items-start gap-3 py-4 border-b border-gray-100 last:border-none"
+  data-controller="thread reply"
+  data-action="click->thread#toggle"
+>
+  <!-- Avatar -->
+  <% if comment.user.avatar.attached? %>
+    <%= image_tag comment.user.avatar.variant(resize_to_fill: [36, 36]),
+                  class: "h-9 w-9 rounded-full object-cover border border-gray-200" %>
+  <% else %>
+    <div class="h-9 w-9 rounded-full bg-gray-300 flex items-center justify-center text-white text-sm font-semibold">
+      <%= comment.user.username[0].upcase %>
+    </div>
+  <% end %>
 
-  <p>
-    <strong>Post:</strong>
-    <%= comment.post_id %>
-  </p>
+  <!-- Body -->
+  <div class="flex-1 min-w-0">
+    <!-- Header (clicking anywhere here toggles replies) -->
+    <div class="flex items-center gap-2 cursor-pointer">
+      <%= link_to "@#{comment.user.username}",
+                  username_profile_path(username: comment.user.username),
+                  class: "text-sm font-semibold text-gray-900 hover:underline truncate",
+                  data: { action: "click->thread#stop" } %>
+      <span class="text-gray-300">•</span>
+      <time class="text-xs text-gray-500" title="<%= comment.created_at.strftime("%B %d, %Y %H:%M") %>">
+        <%= relative_time(comment.created_at) %>
+      </time>
+    </div>
 
-  <p>
-    <strong>Content:</strong>
-    <%= comment.content %>
-  </p>
+    <!-- Content (also toggles on click) -->
+    <div class="mt-1 text-sm leading-6 text-gray-900 whitespace-pre-line">
+      <%= comment.content %>
+    </div>
 
-  <p>
-    <strong>Parent:</strong>
-    <%= comment.parent_id %>
-  </p>
+    <!-- Actions (do NOT toggle) -->
+    <div class="mt-2 flex items-center gap-3 text-xs" data-action="click->thread#stop">
+      <!-- Like -->
+      <%= turbo_frame_tag dom_id(comment, :like_button) do %>
+        <%= render "likes/like_button", likeable: comment %>
+      <% end %>
 
+      <!-- Reply (plain text) -->
+      <button
+        type="button"
+        class="text-gray-600 hover:text-gray-800 hover:underline transition"
+        data-action="click->reply#toggle click->thread#stop"
+        data-comment-id="<%= comment.id %>">
+        Reply
+      </button>
+
+      <!-- Delete (owner only) -->
+      <% if comment.user == current_user %>
+        <%= button_to "Delete",
+              post_comment_path(comment.post, comment),
+              method: :delete,
+              data: { turbo_stream: true, confirm: "Delete this comment?" },
+              class: "text-red-600 hover:text-red-700 hover:underline transition",
+              form: { data: { action: "click->thread#stop" } } %>
+      <% end %>
+
+      <%# Toggle hint (shows count and updates to 'Hide replies') %>
+      <% if comment.replies.any? %>
+        <button
+          type="button"
+          class="text-gray-500 hover:text-gray-700 hover:underline"
+          data-thread-target="toggleText">
+          View replies (<%= comment.replies.size %>)
+        </button>
+      <% end %>
+    </div>
+
+    <!-- Replies (initially hidden, no indentation, connected line) -->
+    <% if comment.replies.any? %>
+      <div
+        class="mt-3 relative space-y-3 hidden"
+        data-thread-target="replies"
+        data-count="<%= comment.replies.size %>">
+        <% comment.replies.each do |reply| %>
+          <div class="relative pl-6">
+            <div class="absolute left-2 top-0 bottom-0 w-px bg-gray-300"></div>
+            <%= render reply %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Reply form (hidden by default) -->
+    <div id="reply-form-<%= comment.id %>" class="ml-10 mt-2 hidden" data-action="click->thread#stop">
+      <%= render 'comments/form', post: comment.post, parent: comment %>
+    </div>
+  </div>
 </div>

@@ -1,0 +1,20 @@
+<div class="max-w-2xl mx-auto p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold">Notifications</h1>
+    <% if current_user.notifications.unread.exists? %>
+      <%= button_to "Mark all as read",
+          mark_all_read_notifications_path,
+          method: :patch,
+          class: "text-sm px-3 py-1.5 rounded bg-gray-900 text-white hover:bg-gray-800" %>
+    <% end %>
+  </div>
+
+  <div class="space-y-2">
+    <% @notifications.each do |n| %>
+      <%= render partial: "notifications/notification", locals: { notification: n } %>
+    <% end %>
+    <% if @notifications.empty? %>
+      <p class="text-gray-500">No notifications yet.</p>
+    <% end %>
+  </div>
+</div>

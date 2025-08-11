@@ -21,6 +21,20 @@ class User < ApplicationRecord
 
   has_many :likes, dependent: :destroy
   has_many :liked_posts, through: :likes, source: :post
+  
+  has_many :comments, dependent: :destroy
+
+  has_many :notifications,
+           foreign_key: :recipient_id,
+           dependent: :destroy,
+           inverse_of: :recipient
+
+  # (Optional) Notifications the user triggers as the actor
+  has_many :activity_notifications,
+           class_name: "Notification",
+           foreign_key: :actor_id,
+           dependent: :nullify,
+           inverse_of: :actor
 
   def full_name
     "#{first_name} #{last_name}".strip

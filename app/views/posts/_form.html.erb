@@ -1,8 +1,8 @@
-<%= form_with(model: post, local: true, html: { multipart: true }) do |form| %>
+<%= form_with(model: post, local: true, html: { class: "space-y-6" }) do |form| %>
   <% if post.errors.any? %>
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-      <h2 class="font-semibold"><%= pluralize(post.errors.count, "error") %> prevented this post from being saved:</h2>
-      <ul class="list-disc ml-5 mt-2 text-sm">
+    <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
+      <p class="font-semibold"><%= pluralize(post.errors.count, "error") %> prevented this post from saving:</p>
+      <ul class="list-disc pl-5 mt-2 space-y-1">
         <% post.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
@@ -10,24 +10,69 @@
     </div>
   <% end %>
 
-  <div class="mb-4">
-    <%= form.label :content, class: "block font-semibold mb-1" %>
-    <%= form.text_area :content, rows: 5, class: "w-full border border-gray-300 rounded px-3 py-2" %>
+  <!-- Post Content -->
+  <div>
+    <%= form.label :content, "Post Content", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.text_area :content,
+          rows: 5,
+          placeholder: "Write your post...",
+          class: "w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none shadow-sm placeholder-gray-400" %>
   </div>
 
-  <div class="mb-4">
-    <%= form.label :image, class: "block font-semibold mb-1" %>
-    <%= form.file_field :image, class: "w-full text-sm" %>
+  <!-- Rating -->
+  <% if post.respond_to?(:rating) %>
+    <div>
+      <%= form.label :rating, "Rating (1–5)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <div class="relative inline-block">
+        <%= form.select :rating,
+              options_for_select([["—", nil]] + (1..5).map { |n| [n, n] }, post.rating),
+              {},
+              class: "w-20 text-sm border border-gray-300 rounded-lg px-2 py-1 bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 appearance-none pr-6" %>
+        <span class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Image Upload -->
+  <div>
+    <%= form.label :image, "Post Image", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.file_field :image,
+          class: "block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" %>
+
+    <% if post.image.attached? %>
+      <div class="mt-3">
+        <p class="text-xs text-gray-500 mb-1">Current Image:</p>
+        <%= image_tag post.image.variant(resize_to_limit: [400, 400]),
+              class: "rounded-lg border border-gray-200 shadow-sm" %>
+      </div>
+    <% end %>
   </div>
 
-  <div class="mb-4">
-    <%= form.label :rating, "Rating (optional)", class: "block font-semibold mb-1" %>
-    <%= form.select :rating,
-          options_for_select([["—", nil]] + (1..5).map { |n| [n, n] }, selected: post.rating),
-          {}, class: "w-full border border-gray-300 rounded px-3 py-2 bg-white" %>
+  <!-- Product Tagging -->
+  <div data-controller="tokens" data-tokens-url-value="<%= autocomplete_products_path %>">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Products</label>
+    <%= form.hidden_field :product_names, value: post.product_names, data: { "tokens-target": "hidden" } %>
+    <div class="rounded-lg border border-gray-300 p-2 flex flex-wrap gap-2" data-tokens-target="container">
+      <input type="text"
+             placeholder="Type to add products (e.g. “NARS: Orgasm”)"
+             class="flex-1 min-w-[8rem] outline-none text-sm"
+             data-action="input->tokens#type keydown->tokens#keys"
+             data-tokens-target="input" />
+    </div>
+    <div class="relative">
+      <ul class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden"
+          data-tokens-target="menu"></ul>
+    </div>
+    <p class="mt-1 text-xs text-gray-500">
+      Tip: Use “Brand: Product Name” for clarity. Separate multiple with commas.  
+      <span class="font-semibold text-red-600">Click Enter to submit the product.</span>
+    </p>
   </div>
 
-  <div class="text-right">
-    <%= form.submit "Post", class: "bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded" %>
+
+  <!-- Submit -->
+  <div class="flex justify-end">
+    <%= form.submit "Post",
+          class: "inline-flex items-center gap-2 px-6 py-2 rounded-full bg-red-600 text-white text-sm font-semibold hover:bg-red-700 active:scale-[.98] transition shadow-sm" %>
   </div>
 <% end %>

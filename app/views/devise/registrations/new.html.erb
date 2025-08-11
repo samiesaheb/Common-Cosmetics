@@ -1,33 +1,91 @@
-<div class="max-w-md mx-auto mt-12 p-6 bg-white rounded-lg shadow-md">
-  <h2 class="text-2xl font-bold mb-6 text-center text-red-600">Sign Up for Common Cosmetics</h2>
-
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-    <%= render "devise/shared/error_messages", resource: resource %>
-
-    <div class="mb-4">
-      <%= f.label :email, class: "block font-semibold mb-1" %>
-      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full border border-gray-300 rounded px-3 py-2" %>
+<div class="max-w-md mx-auto mt-16">
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Create your account</h1>
+      <p class="text-sm text-gray-500">Join <span class="font-semibold">Common Cosmetics</span> to discover and share looks.</p>
     </div>
 
-    <div class="mb-4">
-      <%= f.label :password, class: "block font-semibold mb-1" %>
-      <% if @minimum_password_length %>
-        <p class="text-sm text-gray-500 mb-1"><%= @minimum_password_length %> characters minimum</p>
-      <% end %>
-      <%= f.password_field :password, autocomplete: "new-password", class: "w-full border border-gray-300 rounded px-3 py-2" %>
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), data: { turbo: false }, html: { class: "space-y-5" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div>
+        <%= f.label :username, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <div class="relative">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <!-- at icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2a10 10 0 1010 10v1a3 3 0 01-6 0v-1a4 4 0 10-1.33 2.96V12a1 1 0 112 0v1a5 5 0 101 0v-1A10 10 0 0012 2z"/>
+            </svg>
+          </span>
+          <%= f.text_field :username, autocomplete: "username", placeholder: "yourname",
+                class: "w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500" %>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">This will become your handle (e.g. <span class="font-mono">@yourname</span>).</p>
+      </div>
+
+      <div>
+        <%= f.label :email, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <div class="relative">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <!-- mail icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7l9 6 9-6m-18 10h18V7H3v10z"/>
+            </svg>
+          </span>
+          <%= f.email_field :email, autocomplete: "email",
+                class: "w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500" %>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
+          <% if @minimum_password_length %>
+            <span class="text-xs text-gray-500"><%= @minimum_password_length %>+ characters</span>
+          <% end %>
+        </div>
+        <div class="relative">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <!-- lock icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1a5 5 0 00-5 5v3H6a3 3 0 00-3 3v7a3 3 0 003 3h12a3 3 0 003-3v-7a3 3 0 00-3-3h-1V6a5 5 0 00-5-5zm-3 8V6a3 3 0 116 0v3H9z"/>
+            </svg>
+          </span>
+          <%= f.password_field :password, autocomplete: "new-password",
+                class: "w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500" %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <div class="relative">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <!-- lock icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1a5 5 0 00-5 5v3H6a3 3 0 00-3 3v7a3 3 0 003 3h12a3 3 0 003-3v-7a3 3 0 00-3-3h-1V6a5 5 0 00-5-5zm-3 8V6a3 3 0 116 0v3H9z"/>
+            </svg>
+          </span>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password",
+                class: "w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500" %>
+        </div>
+      </div>
+
+      <%= f.submit "Sign up", class: "w-full !bg-red-600 !hover:bg-red-700 text-white font-semibold py-2 px-4 rounded" %>
+    <% end %>
+
+    <div class="my-6 flex items-center gap-4">
+      <div class="h-px bg-gray-200 flex-1"></div>
+      <div class="text-xs uppercase tracking-wide text-gray-400">or</div>
+      <div class="h-px bg-gray-200 flex-1"></div>
     </div>
 
-    <div class="mb-4">
-      <%= f.label :password_confirmation, class: "block font-semibold mb-1" %>
-      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full border border-gray-300 rounded px-3 py-2" %>
+    <div class="text-center text-sm text-gray-700">
+      Already have an account?
+      <%= link_to "Log in", new_session_path(resource_name), class: "text-rose-600 font-medium hover:underline" %>
     </div>
+  </div>
 
-    <div>
-      <%= f.submit "Sign up", class: "w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded" %>
-    </div>
-  <% end %>
-
-  <div class="mt-6 text-center text-sm">
-    <%= render "devise/shared/links" %>
+  <div class="text-center text-xs text-gray-500 mt-4">
+    By creating an account, you agree to our Terms and Privacy Policy.
   </div>
 </div>

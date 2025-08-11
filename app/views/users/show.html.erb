@@ -1,57 +1,87 @@
-<div class="max-w-2xl mx-auto mt-12 p-6 bg-white rounded-lg shadow-md">
-  <div class="flex flex-col items-center">
-    <% if @user.avatar.attached? %>
-      <%= image_tag @user.avatar.variant(resize_to_limit: [128, 128]), class: "rounded-full w-32 h-32 object-cover border shadow" %>
-    <% else %>
-      <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-4xl text-gray-500">
-        👤
+<div class="max-w-3xl mx-auto mt-8">
+  <!-- Cover -->
+  <div class="h-32 sm:h-40 rounded-2xl bg-gradient-to-r from-rose-200 via-rose-300 to-rose-200 border border-gray-200"></div>
+
+  <!-- Card -->
+  <div class="-mt-12 sm:-mt-16 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+    <!-- Top: Avatar + Actions -->
+    <div class="flex items-end justify-between gap-4">
+      <div class="flex items-end gap-4">
+        <div class="shrink-0">
+          <% if @user.avatar.attached? %>
+            <%= image_tag @user.avatar.variant(resize_to_limit: [160, 160]),
+                  class: "h-28 w-28 sm:h-36 sm:w-36 -mt-12 sm:-mt-16 rounded-full object-cover border-4 border-white shadow-md" %>
+          <% else %>
+            <div class="h-28 w-28 sm:h-36 sm:w-36 -mt-12 sm:-mt-16 rounded-full grid place-items-center bg-gray-200 border-4 border-white shadow-md text-4xl text-gray-500">
+              👤
+            </div>
+          <% end %>
+        </div>
+
+        <div class="pb-1">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900"><%= @user.full_name.presence || "@#{@user.username}" %></h1>
+          <div class="text-gray-500">@<%= @user.username %></div>
+        </div>
       </div>
-    <% end %>
 
-    <h2 class="text-xl font-semibold mt-2">
-      <%= @user.full_name %>
-    </h2>
-
-    <h2 class="text-2xl font-bold mt-2">@<%= @user.username %></h2>
-
-    <p class="text-gray-600 mt-2 text-center max-w-md"><%= @user.bio.presence || "No bio yet." %></p>
-
-    <p class="text-sm text-gray-500 mt-2">Joined <%= @user.created_at.strftime("%B %Y") %></p>
-
-    <div class="flex space-x-6 mt-4">
-      <div class="text-center">
-        <p class="text-lg font-bold"><%= @user.followers.count %></p>
-        <p class="text-gray-600 text-sm">Followers</p>
-      </div>
-      <div class="text-center">
-        <p class="text-lg font-bold"><%= @user.following.count %></p>
-        <p class="text-gray-600 text-sm">Following</p>
-      </div>
+      <!-- Actions -->
+      <% if user_signed_in? && current_user != @user %>
+        <div class="flex gap-2">
+          <% if @is_following %>
+            <%= button_to "Unfollow",
+                unfollow_follows_path(followed_id: @user.id),
+                method: :delete,
+                class: "inline-flex items-center gap-2 rounded-xl bg-gray-100 text-gray-800 px-4 py-2 hover:bg-gray-200 font-medium" %>
+          <% else %>
+              <%= button_to "Follow",
+                  follows_path(followed_id: @user.id),
+                  method: :post,
+                  class: "inline-flex items-center gap-2 rounded-xl bg-red-600 text-white px-4 py-2 hover:bg-red-700 font-medium" %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
 
-    <% if user_signed_in? && current_user != @user %>
-      <div class="mt-4">
-        <% if @is_following %>
-          <%= button_to "Unfollow", follow_path(followed_id: @user.id), method: :delete, class: "bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200" %>
-        <% else %>
-          <%= button_to "Follow", follows_path(followed_id: @user.id), method: :post, class: "bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" %>
-        <% end %>
+    <!-- Bio + Meta -->
+    <div class="mt-4 space-y-3">
+      <p class="text-gray-700"><%= @user.bio.presence || "No bio yet." %></p>
+      <div class="text-sm text-gray-500">Joined <%= @user.created_at.strftime("%B %Y") %></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div class="rounded-xl border border-gray-200 p-4 text-center">
+        <div class="text-2xl font-bold text-gray-900"><%= @user.posts.count %></div>
+        <div class="text-xs uppercase tracking-wide text-gray-500">Posts</div>
       </div>
-    <% end %>
+      <div class="rounded-xl border border-gray-200 p-4 text-center">
+        <div class="text-2xl font-bold text-gray-900"><%= @user.followers.count %></div>
+        <div class="text-xs uppercase tracking-wide text-gray-500">Followers</div>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-4 text-center">
+        <div class="text-2xl font-bold text-gray-900"><%= @user.following.count %></div>
+        <div class="text-xs uppercase tracking-wide text-gray-500">Following</div>
+      </div>
+    </div>
   </div>
 
-  <!-- User's Posts -->
-  <div class="mt-10 w-full">
-    <h3 class="text-xl font-bold mb-4">
-      Posts <span class="text-sm font-normal text-gray-500">(<%= @user.posts.count %>)</span>
-    </h3>
+  <!-- Posts -->
+  <div class="mt-8">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-gray-900">Posts</h2>
+      <span class="text-sm text-gray-500"><%= @user.posts.count %> total</span>
+    </div>
 
     <% if @user.posts.any? %>
-      <% @user.posts.order(created_at: :desc).each do |post| %>
-        <%= render partial: "posts/post", locals: { post: post } %>
-      <% end %>
+      <div class="space-y-4">
+        <% @user.posts.order(created_at: :desc).each do |post| %>
+          <%= render partial: "posts/post", locals: { post: post } %>
+        <% end %>
+      </div>
     <% else %>
-      <p class="text-gray-500 text-center mt-6">This user hasn’t posted anything yet.</p>
+      <div class="rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-500">
+        This user hasn’t posted anything yet.
+      </div>
     <% end %>
   </div>
 </div>

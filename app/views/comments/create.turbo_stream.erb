@@ -1,0 +1,1 @@
+<%= turbo_stream.append "comments_for_post_#{@post.id}", partial: "comments/comment", locals: { comment: @comment } %>

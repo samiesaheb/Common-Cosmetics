@@ -1,0 +1,7 @@
+<%= turbo_stream.replace "follow_button" do %>
+  <%= render "users/follow_button", user: @user %>
+<% end %>
+
+<%= turbo_stream.replace "follower_count" do %>
+  <%= @user.followers.count %>
+<% end %>

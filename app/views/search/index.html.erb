@@ -1,0 +1,47 @@
+<!-- app/views/search/index.html.erb -->
+<div class="max-w-2xl mx-auto mt-8 space-y-8">
+  <% if params[:q].present? %>
+    <h1 class="text-xl font-bold">Results for “<%= h params[:q] %>”</h1>
+
+    <% if @users.any? %>
+      <section>
+        <h2 class="text-sm font-semibold text-gray-500 mb-2">Users</h2>
+        <ul class="divide-y divide-gray-200 bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <% @users.each do |u| %>
+            <li>
+              <%= link_to username_profile_path(username: u.username),
+                          class: "flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition" do %>
+                <% if u.avatar.attached? %>
+                  <%= image_tag u.avatar.variant(resize_to_fill: [28, 28]),
+                                class: "h-7 w-7 rounded-full object-cover border border-gray-200" %>
+                <% else %>
+                  <div class="h-7 w-7 rounded-full bg-gray-300 text-white text-xs font-semibold grid place-items-center">
+                    <%= u.username[0].upcase %>
+                  </div>
+                <% end %>
+                <span class="text-sm font-medium text-gray-900 truncate">@<%= u.username %></span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <% if @posts.any? %>
+      <section>
+        <h2 class="text-sm font-semibold text-gray-500 mb-2">Posts</h2>
+        <div class="space-y-4">
+          <% @posts.each do |p| %>
+            <%= render "posts/post", post: p %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @users.blank? && @posts.blank? %>
+      <p class="text-gray-500 mt-6">No results found.</p>
+    <% end %>
+  <% else %>
+    <p class="text-gray-500 mt-6">Try searching for users or posts.</p>
+  <% end %>
+</div>

@@ -1,37 +1,29 @@
-<%= form_with(model: comment) do |form| %>
-  <% if comment.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(comment.errors.count, "error") %> prohibited this comment from being saved:</h2>
-
-      <ul>
-        <% comment.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
+<%= form_with(model: [post, Comment.new], local: false) do |form| %>
+  <!-- If replying to a comment, include hidden parent_id field -->
+  <% if defined?(parent) && parent.present? %>
+    <%= form.hidden_field :parent_id, value: parent.id %>
   <% end %>
 
-  <div>
-    <%= form.label :user_id, style: "display: block" %>
-    <%= form.text_field :user_id %>
-  </div>
+  <div class="flex gap-2 items-start mt-4">
+    <!-- Optional avatar preview -->
+    <% if current_user.avatar.attached? %>
+      <%= image_tag current_user.avatar.variant(resize_to_fill: [36, 36]), class: "w-9 h-9 rounded-full object-cover mt-1" %>
+    <% else %>
+      <div class="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center text-white text-sm font-semibold mt-1">
+        <%= current_user.username[0].upcase %>
+      </div>
+    <% end %>
 
-  <div>
-    <%= form.label :post_id, style: "display: block" %>
-    <%= form.text_field :post_id %>
-  </div>
+    <div class="flex-1">
+      <%= form.text_area :content,
+            rows: 2,
+            placeholder: (form.object.parent_id.present? ? "Write a reply..." : "Write a comment..."),
+            class: "w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none" %>
 
-  <div>
-    <%= form.label :content, style: "display: block" %>
-    <%= form.textarea :content %>
-  </div>
-
-  <div>
-    <%= form.label :parent_id, style: "display: block" %>
-    <%= form.number_field :parent_id %>
-  </div>
-
-  <div>
-    <%= form.submit %>
+      <div class="mt-2 flex justify-end">
+        <%= form.submit (form.object.parent_id.present? ? "Reply" : "Comment"),
+              class: "text-sm px-4 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition" %>
+      </div>
+    </div>
   </div>
 <% end %>

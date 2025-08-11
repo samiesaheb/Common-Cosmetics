@@ -10,9 +10,6 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
@@ -22,26 +19,43 @@
   </head>
 
   <body class="min-h-screen bg-white text-gray-900 flex">
-
     <!-- Sidebar -->
     <%= render "shared/sidebar" %>
 
     <!-- Main Content Area -->
-    <main class="flex-1 ml-64 p-6">
-      <% if notice %>
-        <div class="bg-green-100 text-green-800 p-3 rounded mb-4 max-w-xl mx-auto text-center">
-          <%= notice %>
-        </div>
-      <% end %>
+    <main class="flex-1">
+      <!-- Header (search, auth, etc.) -->
+      <%= render "shared/header" %>
 
-      <% if alert %>
-        <div class="bg-red-100 text-red-800 p-3 rounded mb-4 max-w-xl mx-auto text-center">
-          <%= alert %>
-        </div>
-      <% end %>
+      <div class="p-6">
+        <div class="mx-auto w-full max-w-2xl">
+          <%# ---- Single, deduped, auto-dismissing flash area ---- %>
+          <% printed = [] %>
+          <% flash.each do |type, message| %>
+            <% next if message.blank? || printed.include?(message.to_s) %>
+            <% printed << message.to_s %>
 
-      <%= yield %>
+            <% css = case type.to_sym
+                     when :notice then "bg-green-100 text-green-800"
+                     when :alert, :error then "bg-red-100 text-red-800"
+                     else "bg-gray-100 text-gray-800"
+                     end %>
+
+            <div
+              data-controller="flash"
+              data-flash-timeout-value="3000"
+              class="<%= css %> p-3 rounded mb-4 text-center transition-opacity duration-500"
+              data-turbo-temporary
+            >
+              <%= message %>
+            </div>
+          <% end %>
+          <%# Clear flashes so Turbo/history can't re-insert them %>
+          <% flash.clear %>
+
+          <%= yield %>
+        </div>
+      </div>
     </main>
-
   </body>
 </html>

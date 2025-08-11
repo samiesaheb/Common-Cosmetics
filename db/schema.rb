@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_08_071104) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_10_140517) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -68,6 +68,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_08_071104) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["followed_id"], name: "index_follows_on_followed_id"
+    t.index ["follower_id", "followed_id"], name: "index_follows_on_follower_id_and_followed_id", unique: true
     t.index ["follower_id"], name: "index_follows_on_follower_id"
   end
 
@@ -81,6 +82,31 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_08_071104) do
     t.index ["user_id"], name: "index_likes_on_user_id"
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "recipient_id", null: false
+    t.bigint "actor_id", null: false
+    t.string "action"
+    t.string "notifiable_type", null: false
+    t.bigint "notifiable_id", null: false
+    t.datetime "read_at"
+    t.jsonb "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["recipient_id"], name: "index_notifications_on_recipient_id"
+  end
+
+  create_table "post_products", force: :cascade do |t|
+    t.bigint "post_id", null: false
+    t.bigint "product_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id", "product_id"], name: "index_post_products_on_post_id_and_product_id", unique: true
+    t.index ["post_id"], name: "index_post_products_on_post_id"
+    t.index ["product_id"], name: "index_post_products_on_product_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.text "content"
@@ -88,6 +114,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_08_071104) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_posts_on_user_id"
+  end
+
+  create_table "product_follows", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "product_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_follows_on_product_id"
+    t.index ["user_id"], name: "index_product_follows_on_user_id"
+  end
+
+  create_table "product_tags", force: :cascade do |t|
+    t.bigint "post_id", null: false
+    t.bigint "product_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id"], name: "index_product_tags_on_post_id"
+    t.index ["product_id"], name: "index_product_tags_on_product_id"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "brand"
+    t.string "slug", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_products_on_name"
+    t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -116,5 +170,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_08_071104) do
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "likes", "users"
+  add_foreign_key "notifications", "users", column: "actor_id"
+  add_foreign_key "notifications", "users", column: "recipient_id"
+  add_foreign_key "post_products", "posts"
+  add_foreign_key "post_products", "products"
   add_foreign_key "posts", "users"
+  add_foreign_key "product_follows", "products"
+  add_foreign_key "product_follows", "users"
+  add_foreign_key "product_tags", "posts"
+  add_foreign_key "product_tags", "products"
 end

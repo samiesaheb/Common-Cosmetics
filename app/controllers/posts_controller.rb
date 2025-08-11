@@ -6,9 +6,10 @@ class PostsController < ApplicationController
   def index
     if user_signed_in?
       followed_ids = current_user.following.pluck(:id)
-      @posts = Post.where(user_id: followed_ids + [current_user.id])
-                  .includes(:user, image_attachment: :blob)
-                  .order(created_at: :desc)
+      @posts = Post
+        .where(user_id: followed_ids + [current_user.id])
+        .includes(:user, :products, image_attachment: :blob)
+        .order(created_at: :desc)
     else
       @posts = Post.none
     end
@@ -29,8 +30,9 @@ class PostsController < ApplicationController
 
   # POST /posts
   def create
-    @post = current_user.posts.build(post_params)
-
+    @post = current_user.posts.new(post_params.except(:product_names))
+    pn = post_params[:product_names]
+    @post.product_names = pn if pn.present?          # <-- guard
     if @post.save
       redirect_to @post, notice: "Post was successfully created."
     else
@@ -38,14 +40,17 @@ class PostsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /posts/1
   def update
-    if @post.update(post_params)
+    @post.assign_attributes(post_params.except(:product_names))
+    pn = post_params[:product_names]
+    @post.product_names = pn if pn.present?          # <-- guard (keep existing if field missing)
+    if @post.save
       redirect_to @post, notice: "Post was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
   end
+
 
   # DELETE /posts/1
   def destroy
@@ -56,10 +61,10 @@ class PostsController < ApplicationController
   private
 
     def set_post
-      @post = Post.find(params[:id])
+      @post = Post.includes(:user, :products, image_attachment: :blob).find(params[:id])
     end
 
     def post_params
-      params.require(:post).permit(:content, :image, :rating)
+      params.require(:post).permit(:content, :image, :rating, :product_names)
     end
 end

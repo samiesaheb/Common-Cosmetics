@@ -1,0 +1,19 @@
+<% n = notification %>
+<div class="border rounded-lg p-4 flex items-start justify-between <%= n.read? ? 'bg-white' : 'bg-red-50' %>">
+  <div>
+    <p class="text-sm">
+      <span class="font-medium"><%= n.message %></span>
+    </p>
+    <p class="text-xs text-gray-500 mt-1"><%= time_ago_in_words(n.created_at) %> ago</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <% if n.read? %>
+      <%= link_to "Open", n.url, class: "text-sm underline" %>
+    <% else %>
+      <%= button_to "Open",
+          notification_path(n),
+          method: :put,
+          class: "text-sm px-3 py-1 rounded bg-gray-900 text-white hover:bg-gray-800" %>
+    <% end %>
+  </div>
+</div>

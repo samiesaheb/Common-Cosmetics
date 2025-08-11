@@ -1,0 +1,61 @@
+<%= turbo_frame_tag "search_suggestions", class: "absolute left-0 right-0 mt-2" do %>
+  <% any_results = (q.present? && (users.any? || products.any?)) %>
+  <% if any_results %>
+    <div class="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
+         data-controller="typeahead"
+         data-action="mousedown->typeahead#keepOpen mouseup->typeahead#keepOpen">
+
+      <% if users.any? %>
+        <div class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-500">Users</div>
+        <ul class="divide-y divide-gray-100">
+          <% users.each do |u| %>
+            <li>
+              <%= link_to username_profile_path(username: u.username),
+                          class: "flex items-center gap-3 px-3 py-2 hover:bg-gray-50",
+                          data: { turbo_frame: "_top" } do %>
+                <% if u.avatar.attached? %>
+                  <%= image_tag u.avatar.variant(resize_to_fill: [28, 28]),
+                                class: "h-7 w-7 rounded-full object-cover border border-gray-200" %>
+                <% else %>
+                  <div class="h-7 w-7 rounded-full bg-gray-300 text-white text-xs font-semibold grid place-items-center">
+                    <%= u.username[0].upcase %>
+                  </div>
+                <% end %>
+                <span class="text-sm font-medium text-gray-900 truncate">@<%= u.username %></span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+
+      <% if products.any? %>
+        <div class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-500">Products</div>
+        <ul class="divide-y divide-gray-100">
+          <% products.each do |p| %>
+            <% label = [p.brand, p.name].compact.join(" ").strip.presence || p.name %>
+            <li>
+              <!-- Quick link to full search for posts with this product -->
+              <%= link_to search_path(q: label),
+                          class: "flex items-center gap-3 px-3 py-2 hover:bg-gray-50",
+                          data: { turbo_frame: "_top" } do %>
+                <div class="h-7 w-7 rounded bg-red-50 text-red-600 grid place-items-center text-[10px] font-semibold border border-red-100">PRD</div>
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-gray-900 truncate"><%= label %></div>
+                  <div class="text-xs text-gray-500 truncate">Search posts with “<%= label %>”</div>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+
+      <div class="px-3 py-2 flex items-center justify-between">
+        <span class="text-xs text-gray-500 truncate">Press Enter for full results</span>
+        <%= link_to "Open search",
+                    search_path(q: q),
+                    class: "text-sm text-red-600 hover:underline font-medium",
+                    data: { turbo_frame: "_top" } %>
+      </div>
+    </div>
+  <% end %>
+<% end %>

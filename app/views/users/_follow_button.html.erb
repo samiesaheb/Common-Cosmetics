@@ -1,0 +1,17 @@
+<!-- app/views/users/_follow_button.html.erb -->
+<turbo-frame id="follow_button">
+  <% if current_user == user %>
+    <!-- No follow button on your own profile -->
+  <% elsif current_user.following.exists?(user.id) %>
+    <%= button_to "Unfollow",
+          unfollow_follows_path(followed_id: user.id),  # collection DELETE
+          method: :delete,
+          form: { data: { turbo_confirm: "Unfollow @#{user.username}?" } },
+          class: "px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+  <% else %>
+    <%= button_to "Follow",
+          follows_path(followed_id: user.id),           # POST /follows
+          method: :post,
+          class: "px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium" %>
+  <% end %>
+</turbo-frame>

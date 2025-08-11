@@ -6,3 +6,29 @@ import { application } from "./application"
 
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
+
+import ReplyController from "./reply_controller"
+application.register("reply", ReplyController)
+
+// ⬇️ Add these:
+import FlashController from "./flash_controller"
+application.register("flash", FlashController)
+
+import ThreadController from "./thread_controller"
+application.register("thread", ThreadController)
+
+import TypeaheadController from "./typeahead_controller"
+application.register("typeahead", TypeaheadController)
+
+// NEW: avatar preview + bio character counter
+import AvatarPreviewController from "./avatar_preview_controller"
+application.register("avatar-preview", AvatarPreviewController)
+
+import CharCountController from "./char_count_controller"
+application.register("char-count", CharCountController)
+
+import TokensController from "./tokens_controller"
+application.register("tokens", TokensController)
+
+import CardNavController from "./card_nav_controller"
+application.register("card-nav", CardNavController)
